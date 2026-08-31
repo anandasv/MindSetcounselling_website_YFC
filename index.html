@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindSet | 15-Minute Micro-Coaching for Students</title>
+    <meta name="description" content="Quick, judgment-free 15-minute micro-coaching sessions to help students beat distractions, overcome procrastination, and study smarter.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Optional EmailJS SDK for zero-backend direct email sending -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+    <!-- Top Notification Bar -->
+    <div class="announcement-bar">
+        <span>✨ <strong>Limited Free Trial:</strong> First 15-minute session is 100% free — No card needed</span>
+    </div>
+
+    <div class="page-container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="logo">
+                <span class="logo-icon">🧠</span>
+                <span class="logo-text">Mind<strong>Set</strong></span>
+            </div>
+            <div class="nav-actions">
+                <a href="#quick-timer" class="nav-link">Try Mini-Timer</a>
+                <a href="#booking" class="btn-primary-sm">Book Free Session</a>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <header class="hero-section">
+            <div class="hero-badge">⚡ Quick • Judgment-Free • Student-First</div>
+            <h1 class="hero-title">Stop Scrolling. Start Finishing in 15 Minutes.</h1>
+            <p class="hero-subtitle">
+                Feeling overwhelmed or stuck in a social media loop? Jump into a quick 1-on-1 online micro-session with a friendly peer coach who understands your struggles.
+            </p>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number">15 min</span>
+                    <span class="stat-label">Bite-sized format</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number">75-85%</span>
+                    <span class="stat-label">Success Rate</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number">98%</span>
+                    <span class="stat-label">Less guilt & stress</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Booking Flow -->
+        <section class="booking-section" id="booking">
+            <div class="card-header">
+                <div class="step-indicator">
+                    <div class="step-pill active" id="step1Pill">1. Details</div>
+                    <div class="step-line" id="stepLine"></div>
+                    <div class="step-pill" id="step2Pill">2. Verification</div>
+                    <div class="step-line" id="stepLine2"></div>
+                    <div class="step-pill" id="step3Pill">3. Confirmed</div>
+                </div>
+                <h2 id="bookingTitle">Book Your 15-Minute Session</h2>
+                <p id="bookingSubtitle" class="text-muted">Choose your preferred time & verify your contact details to reserve your spot.</p>
+            </div>
+
+            <!-- STEP 1: Main Form -->
+            <form id="bookingForm" class="booking-form" novalidate>
+
+                <!-- "I am" role dropdown — full width above the name/contact grid -->
+                <div class="form-group" id="roleFormGroup">
+                    <label for="userRole">I am <span class="req">*</span></label>
+                    <select id="userRole" name="role" required>
+                        <option value="">-- Select who you are --</option>
+                        <option value="A Student">🎒 A Student</option>
+                        <option value="A Parent">👨‍👩‍👧 A Parent</option>
+                        <option value="A Guardian">🛡️ A Guardian</option>
+                        <option value="A Teacher">📖 A Teacher</option>
+                        <option value="Other">✨ Other</option>
+                    </select>
+                    <span class="error-text" id="roleError">Please let us know who you are</span>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group" id="nameFormGroup">
+                        <label for="userName">Your Full Name <span class="req">*</span></label>
+                        <input type="text" id="userName" name="name" required placeholder="e.g. Alex Johnson" autocomplete="name">
+                        <span class="error-text" id="nameError">Please enter your name</span>
+                    </div>
+
+                    <div class="form-group" id="contactFormGroup">
+                        <label for="userContact">Email Address or Mobile Number <span class="req">*</span></label>
+                        <div class="input-with-badge">
+                            <input type="text" id="userContact" name="contact" required placeholder="name@example.com or (555) 000-0000" autocomplete="email tel">
+                            <span class="contact-type-badge" id="contactTypeBadge">Email / SMS</span>
+                        </div>
+                        <span class="helper-text">We'll send a one-time verification code (OTP) to this address.</span>
+                        <span class="error-text" id="contactError">Please enter a valid email address or 10-digit phone number</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Preferred Day & Slot <span class="req">*</span></label>
+                    <div class="slot-date-selector">
+                        <button type="button" class="date-chip active" data-day="Today">Today (Limited)</button>
+                        <button type="button" class="date-chip" data-day="Tomorrow">Tomorrow</button>
+                        <button type="button" class="date-chip" data-day="Saturday">This Weekend</button>
+                    </div>
+                    <div class="time-options">
+                        <button type="button" class="time-btn active" data-time="10:00 AM">
+                            <span class="time-label">10:00 AM</span>
+                            <span class="time-status">Available</span>
+                        </button>
+                        <button type="button" class="time-btn" data-time="02:00 PM">
+                            <span class="time-label">2:00 PM</span>
+                            <span class="time-status">Available</span>
+                        </button>
+                        <button type="button" class="time-btn" data-time="06:00 PM">
+                            <span class="time-label">6:00 PM</span>
+                            <span class="time-status">Popular</span>
+                        </button>
+                        <button type="button" class="time-btn" data-time="08:30 PM">
+                            <span class="time-label">8:30 PM</span>
+                            <span class="time-status">Night Owl</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="selectedTime" value="10:00 AM">
+                    <input type="hidden" id="selectedDay" value="Today">
+                </div>
+
+                <div class="form-group" id="topicFormGroup">
+                    <label for="topic">What's your biggest focus challenge right now? <span class="req">*</span></label>
+                    <select id="topic" required>
+                        <option value="">-- Select a primary topic --</option>
+                        <option value="📱 Endless phone / TikTok / Instagram scrolling">📱 Endless phone / TikTok / Instagram scrolling</option>
+                        <option value="📝 Procrastinating on big papers & assignments">📝 Procrastinating on big papers & assignments</option>
+                        <option value="🗓️ Creating a consistent daily study routine">🗓️ Creating a consistent daily study routine</option>
+                        <option value="🧠 Overwhelmed & anxious about upcoming exams">🧠 Overwhelmed & anxious about upcoming exams</option>
+                        <option value="😴 Bad sleep cycles & low daytime energy">😴 Bad sleep cycles & low daytime energy</option>
+                        <option value="⚡ Just need accountability to get started">⚡ Just need accountability to get started</option>
+                    </select>
+                    <span class="error-text" id="topicError">Please choose a topic to guide your session</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="goalNotes">What do you want to accomplish in the next 24 hours? <span class="opt">(Optional)</span></label>
+                    <textarea id="goalNotes" rows="2" placeholder="e.g. Finish 3 pages of my history paper and outline chapter 4..."></textarea>
+                </div>
+
+                <button type="submit" class="book-btn" id="submitFormBtn">
+                    <span id="btnText">Send Verification Code & Continue</span>
+                    <span class="btn-arrow" id="btnArrow">→</span>
+                </button>
+                <div class="privacy-note">🔒 100% confidential. We never spam or sell your info.</div>
+            </form>
+
+            <!-- STEP 2: OTP Verification Step -->
+            <div class="otp-verification-container" id="otpSection" style="display: none;">
+                <div class="otp-header">
+                    <div class="otp-icon-circle">🔐</div>
+                    <h3>Verify Your Contact Info</h3>
+                    <p class="otp-instructions">
+                        We sent a 6-digit verification code to: <br>
+                        <strong id="otpTargetDisplay">student@example.com</strong>
+                    </p>
+                </div>
+
+                <div class="delivery-toast" id="deliveryToast" style="display: none;"></div>
+
+                <!-- Simulation Info Banner -->
+                <div class="demo-otp-banner" id="demoOtpBanner" style="display: none;">
+                    <div class="banner-tag">DEMO MODE ACTIVE</div>
+                    <p>Your simulated OTP code is: <strong id="simulatedOtpCode" class="otp-highlight">123456</strong></p>
+                    <button type="button" class="btn-copy-otp" id="autoFillOtpBtn">⚡ Click to Auto-Fill</button>
+                </div>
+
+                <form id="otpForm" class="otp-form">
+                    <div class="otp-input-group">
+                        <input type="text" class="otp-digit" inputmode="numeric" maxlength="1" pattern="[0-9]" data-index="0" autofocus autocomplete="one-time-code">
+                        <input type="text" class="otp-digit" inputmode="numeric" maxlength="1" pattern="[0-9]" data-index="1">
+                        <input type="text" class="otp-digit" inputmode="numeric" maxlength="1" pattern="[0-9]" data-index="2">
+                        <input type="text" class="otp-digit" inputmode="numeric" maxlength="1" pattern="[0-9]" data-index="3">
+                        <input type="text" class="otp-digit" inputmode="numeric" maxlength="1" pattern="[0-9]" data-index="4">
+                        <input type="text" class="otp-digit" inputmode="numeric" maxlength="1" pattern="[0-9]" data-index="5">
+                    </div>
+                    <span class="error-text" id="otpError" style="text-align: center;">Invalid code. Please try again.</span>
+
+                    <button type="submit" class="book-btn verify-btn" id="verifyOtpBtn">
+                        Confirm & Reserve My Free Session
+                    </button>
+                </form>
+
+                <div class="otp-resend-wrapper">
+                    <span id="timerText">Resend code in <strong id="countdownTimer">45</strong>s</span>
+                    <button type="button" class="btn-resend" id="resendOtpBtn" disabled>Resend Code</button>
+                </div>
+
+                <div class="otp-back-link">
+                    <button type="button" class="btn-text-link" id="editContactBtn">← Change email / phone number</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Booking Success Confirmation -->
+            <div class="success-message" id="successMessage" style="display: none;">
+                <div class="success-icon-wrapper">
+                    <div class="checkmark-circle">✓</div>
+                </div>
+                <h3>Session Confirmed! 🎉</h3>
+                <p class="success-tagline">You've taken the first step to conquering procrastination.</p>
+                
+                <div class="session-receipt">
+                    <div class="receipt-row">
+                        <span class="receipt-label">Student:</span>
+                        <span class="receipt-val" id="receiptName">Alex Johnson</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Scheduled Time:</span>
+                        <span class="receipt-val" id="receiptTime">Today at 10:00 AM (15 Mins)</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Contact:</span>
+                        <span class="receipt-val" id="receiptContact">alex@example.com</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Topic:</span>
+                        <span class="receipt-val" id="receiptTopic">Social Media Distraction</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons-group">
+                    <button type="button" class="btn-calendar" id="addToCalBtn">
+                        📅 Add to Google Calendar
+                    </button>
+                    <button type="button" class="btn-secondary" id="bookAnotherBtn">
+                        Book Another Session
+                    </button>
+                </div>
+
+                <div class="prep-tips">
+                    <h4>💡 What to expect next:</h4>
+                    <ul>
+                        <li>We just sent a calendar invite link to your contact details.</li>
+                        <li>Your peer mentor will ping you 5 minutes before the session.</li>
+                        <li>No preparation required — just bring whatever you're currently working on!</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Feature 3: Meet the Peer Focus Coaches -->
+        <section class="coaches-section">
+            <h2>Meet Your Focus Mentors</h2>
+            <p class="section-sub">Friendly university students who beat their own procrastination habits and now coach others.</p>
+            <div class="coaches-grid">
+                <div class="coach-card">
+                    <div class="coach-avatar">🎓</div>
+                    <h4>Counsellor 1</h4>
+                    <span class="coach-specialty">Profession • Specialises in:</span>
+                    <p>"I went from cramming all night to sleeping 8 hours by breaking tasks into 15-minute friction-free micro-goals."</p>
+                </div>
+                <div class="coach-card">
+                    <div class="coach-avatar">💻</div>
+                    <h4>Counsellor 2</h4>
+                    <span class="coach-specialty">Profession • Specialises in: </span>
+                    <p>"I'll help you lock your phone triggers and get your coding / writing assignments out of your head onto paper."</p>
+                </div>
+                <div class="coach-card">
+                    <div class="coach-avatar">📚</div>
+                    <h4>Counsellor 3.</h4>
+                    <span class="coach-specialty">Profession • Specialises in:</span>
+                    <p>"Panic before tests is totally normal. Let's build a relaxed 3-day revision sprint you can actually stick to."</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature 2: Why It Works -->
+        <section class="features-section">
+            <h2>Why Micro-Sessions Work Better Than Willpower</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">⏱️</div>
+                    <h3>15-Minute Micro Bursts</h3>
+                    <p>Long 3-hour study blocks cause burnout and dread. 15 minutes is short enough to bypass brain resistance and start moving.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤝</div>
+                    <h3>Zero Judgment Accountability</h3>
+                    <p>We don't scold you for being on your phone. We help you unpack why you're procrastinating and build easy exit ramps.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Instant Chat or Voice</h3>
+                    <p>Connect over lightweight web chat, audio, or WhatsApp without downloading bloated software.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Action-First Strategy</h3>
+                    <p>Leave every single session with exactly one clear, doable next step written down for your next study block.</p>
+                </div>
+            </div>
+        </section>
+        <!-- Interactive Feature 1: 15-Minute Focus Previewer -->
+        <section class="mini-tool-section" id="quick-timer">
+            <div class="section-badge">✨ Try It Now</div>
+            <h2>Can't wait? Try a 15-Minute Solo Sprint</h2>
+            <p class="section-sub">Practice 15 minutes of uninterrupted focus right now with calming audio ambience.</p>
+
+            <div class="timer-card">
+                <div class="timer-display-ring">
+                    <div class="timer-digits" id="timerDigits">15:00</div>
+                    <div class="timer-status-text" id="timerStatus">Ready to focus?</div>
+                </div>
+
+                <div class="timer-controls">
+                    <button type="button" class="timer-btn primary" id="timerToggleBtn">▶ Start 15-Min Sprint</button>
+                    <button type="button" class="timer-btn secondary" id="timerResetBtn">↺ Reset</button>
+                </div>
+
+                <div class="ambient-sound-selector">
+                    <span class="ambient-label">🎧 Background Sound:</span>
+                    <div class="sound-pills">
+                        <button type="button" class="sound-pill active" data-sound="silent">Mute</button>
+                        <button type="button" class="sound-pill" data-sound="rain">🌧️ Soft Rain</button>
+                        <button type="button" class="sound-pill" data-sound="whitenoise">🌊 White Noise</button>
+                        <button type="button" class="sound-pill" data-sound="cafe">☕ Lo-Fi Cafe</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section with interactive accordion -->
+        <section class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-accordion">
+                <details class="faq-item">
+                    <summary>How long is a session and how do we meet?</summary>
+                    <div class="faq-answer">
+                        <p>Each session is strictly 15 minutes. Once confirmed via OTP, you'll receive a one-click web link (or WhatsApp/Zoom/SMS call link depending on your preference). No special app downloads required!</p>
+                    </div>
+                </details>
+
+                <details class="faq-item">
+                    <summary>Is the first session really 100% free?</summary>
+                    <div class="faq-answer">
+                        <p>Yes! Your first 15-minute trial session is completely free. We do not ask for any credit card or payment details.</p>
+                    </div>
+                </details>
+
+                <details class="faq-item">
+                    <summary>Do I need to turn my camera on?</summary>
+                    <div class="faq-answer">
+                        <p>Camera is 100% optional! You can do voice-only, audio, or text chat if that feels more comfortable for you.</p>
+                    </div>
+                </details>
+
+                <details class="faq-item">
+                    <summary>What if I need to reschedule or cancel?</summary>
+                    <div class="faq-answer">
+                        <p>You can reschedule or cancel at any time with a single tap from the SMS/email confirmation link.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section class="testimonials-section">
+            <h2>What Students Are Saying</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p>"I was wasting 4 hours every evening between Instagram reels and Discord. One 15-min call helped me set up app friction rules, and now I finish homework before dinner."</p>
+                    <span class="testimonial-author">— Alex T., High School Junior</span>
+                </div>
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p>"Having an empathetic coach to talk to who didn't shame me for falling behind completely changed my semester."</p>
+                    <span class="testimonial-author">— Maria L., College Freshman</span>
+                </div>
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p>"The 15-minute limit is genius. It doesn't feel like a therapy session or a lecture, just a quick tactical reset."</p>
+                    <span class="testimonial-author">— Ethan G., Grade 11</span>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="logo-icon">🎯</span>
+                    <span class="logo-text"><strong>MindSet</strong></span>
+                    <p>Empowering students to overcome distractions and study with confidence.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Support & Contact</h4>
+                    <p>Email: <a href="mailto:anandasv@ekyaschools.com">mindsetsupportcenter@gmail.com</a></p>
+                    <p>Hours: Mon–Sat, 10.00 AM – 8.30 PM EST</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 MindSet Inc. All rights reserved. • Services available exclusively within the territory of India.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Confetti Canvas for celebration -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <script src="app.js"></script>
+</body>
+</html>
