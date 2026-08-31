@@ -85,6 +85,55 @@ document.addEventListener('DOMContentLoaded', () => {
     const soundPills = document.querySelectorAll('.sound-pill');
 
     // -------------------------------------------------------------------------
+    // Time Validation Logic (Disables Past Time Slots for Today)
+    // -------------------------------------------------------------------------
+    function updateTimeSlots() {
+        const now = new Date();
+        const currentHours = now.getHours();
+        const currentMinutes = now.getMinutes();
+        const selectedDay = selectedDayInput ? selectedDayInput.value : state.day;
+
+        document.querySelectorAll('.time-btn').forEach(button => {
+            if (selectedDay !== 'Today') {
+                button.disabled = false;
+                button.classList.remove('disabled');
+                return;
+            }
+
+            const timeString = button.getAttribute('data-time');
+            if (!timeString) return;
+
+            const [time, modifier] = timeString.split(' ');
+            let [hours, minutes] = time.split(':').map(Number);
+
+            if (modifier === 'PM' && hours < 12) hours += 12;
+            if (modifier === 'AM' && hours === 12) hours = 0;
+
+            const isPast = hours < currentHours || (hours === currentHours && minutes <= currentMinutes);
+
+            if (isPast) {
+                button.disabled = true;
+                button.classList.add('disabled');
+                button.classList.remove('active');
+
+                const statusSpan = button.querySelector('.time-status');
+                if (statusSpan) statusSpan.textContent = 'Passed';
+            } else {
+                button.disabled = false;
+                button.classList.remove('disabled');
+            }
+        });
+
+        // If the current active button is now disabled, reset selection
+        const activeBtn = document.querySelector('.time-btn.active');
+        if (activeBtn && activeBtn.disabled) {
+            activeBtn.classList.remove('active');
+            selectedTimeInput.value = '';
+            state.time = '';
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Contact Type Auto-Detection (Email vs Mobile SMS)
     // -------------------------------------------------------------------------
     function detectContactType(value) {
@@ -129,12 +178,15 @@ document.addEventListener('DOMContentLoaded', () => {
             chip.classList.add('active');
             selectedDayInput.value = chip.dataset.day;
             state.day = chip.dataset.day;
+
+            updateTimeSlots();
         });
     });
 
     const timeBtns = document.querySelectorAll('.time-btn');
     timeBtns.forEach(btn => {
         btn.addEventListener('click', () => {
+            if (btn.disabled) return;
             timeBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             selectedTimeInput.value = btn.dataset.time;
@@ -496,6 +548,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         bookingTitle.textContent = 'Book Your 15-Minute Session';
         bookingSubtitle.textContent = 'Choose your preferred time & verify your contact details to reserve your spot.';
+
+        updateTimeSlots();
     });
 
     // -------------------------------------------------------------------------
@@ -710,4 +764,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await playAmbientSound(soundType);
         });
     });
+
+    // Run initial time validation on page initialization
+    updateTimeSlots();
 });

@@ -234,6 +234,14 @@ body {
     margin-bottom: 32px;
 }
 
+.time-btn:disabled,
+.time-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    background-color: #e0e0e0;
+}
+
 /* Step Indicator */
 .step-indicator {
     display: flex;
