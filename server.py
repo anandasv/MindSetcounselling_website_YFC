@@ -141,9 +141,9 @@ def send_real_email_via_resend(recipient, otp_code, student_name="Student"):
     url = "https://api.resend.com/emails"
 
     payload = {
-        "from": f"Focus Sessions <{sender}>",
+        "from": f"MindSet <{sender}>",
         "to": [recipient],
-        "subject": f"🎯 Your Focus Sessions Verification Code: {otp_code}",
+        "subject": f"🧠Your MindSet Verification Code: {otp_code}",
         "html": f"<p>Hi <strong>{student_name}</strong>,</p><p>Your verification code to reserve your Focus Session is: <b style='font-size:24px; color:#4f46e5;'>{otp_code}</b></p><p>Valid for 5 minutes.</p>"
     }
 
@@ -196,7 +196,7 @@ def send_real_sms_via_twilio(phone_number, otp_code):
     payload = urllib.parse.urlencode({
         "From": twilio_number,
         "To": formatted_phone,
-        "Body": f"Your Focus Sessions verification code is: {otp_code}. Valid for 5 minutes."
+        "Body": f"Your MindSet verification code is: {otp_code}. Valid for 5 minutes."
     }).encode("utf-8")
 
     # A restricted API key is preferable in deployed environments. Fall back to
