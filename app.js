@@ -85,21 +85,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const soundPills = document.querySelectorAll('.sound-pill');
 
     // -------------------------------------------------------------------------
-    // Time Validation Logic (Disables Past Time Slots for Today)
+    // Time Validation Logic (Disables Past Time Slots ONLY for Today)
     // -------------------------------------------------------------------------
     function updateTimeSlots() {
         const now = new Date();
         const currentHours = now.getHours();
         const currentMinutes = now.getMinutes();
+
+        // Read selected day from hidden input or fallback state
         const selectedDay = selectedDayInput ? selectedDayInput.value : state.day;
 
         document.querySelectorAll('.time-btn').forEach(button => {
+            const statusSpan = button.querySelector('.time-status');
+            const originalStatus = button.getAttribute('data-original-status') || 'Available';
+
+            // IF NOT TODAY: Re-enable all slots and restore status text
             if (selectedDay !== 'Today') {
                 button.disabled = false;
                 button.classList.remove('disabled');
+                if (statusSpan) {
+                    statusSpan.textContent = originalStatus;
+                }
                 return;
             }
 
+            // IF TODAY: Compare time slot against current system time
             const timeString = button.getAttribute('data-time');
             if (!timeString) return;
 
@@ -116,15 +126,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 button.classList.add('disabled');
                 button.classList.remove('active');
 
-                const statusSpan = button.querySelector('.time-status');
                 if (statusSpan) statusSpan.textContent = 'Passed';
             } else {
                 button.disabled = false;
                 button.classList.remove('disabled');
+                if (statusSpan) statusSpan.textContent = originalStatus;
             }
         });
 
-        // If the current active button is now disabled, reset selection
+        // Clear selection if currently active button becomes disabled
         const activeBtn = document.querySelector('.time-btn.active');
         if (activeBtn && activeBtn.disabled) {
             activeBtn.classList.remove('active');
@@ -132,6 +142,14 @@ document.addEventListener('DOMContentLoaded', () => {
             state.time = '';
         }
     }
+
+    // Save initial status labels so we can restore them when toggling off "Today"
+    document.querySelectorAll('.time-btn').forEach(btn => {
+        const statusSpan = btn.querySelector('.time-status');
+        if (statusSpan) {
+            btn.setAttribute('data-original-status', statusSpan.textContent.trim());
+        }
+    });
 
     // -------------------------------------------------------------------------
     // Contact Type Auto-Detection (Email vs Mobile SMS)
@@ -176,9 +194,12 @@ document.addEventListener('DOMContentLoaded', () => {
         chip.addEventListener('click', () => {
             dateChips.forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
-            selectedDayInput.value = chip.dataset.day;
-            state.day = chip.dataset.day;
+            
+            const selectedDayValue = chip.dataset.day;
+            selectedDayInput.value = selectedDayValue;
+            state.day = selectedDayValue;
 
+            // Recalculate available time slots whenever day changes
             updateTimeSlots();
         });
     });
@@ -765,6 +786,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Run initial time validation on page initialization
+    // Run initial time validation on page load
     updateTimeSlots();
 });
