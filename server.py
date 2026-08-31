@@ -80,18 +80,18 @@ def send_real_email_via_smtp(recipient, otp_code, student_name="Student"):
         return False, "SMTP credentials not configured"
 
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"🎯 Your Focus Sessions Verification Code: {otp_code}"
+    msg["Subject"] = f"🧠Your MindSet Verification Code: {otp_code}"
     msg["From"] = f"Focus Sessions <{sender}>"
     msg["To"] = recipient
 
     text_body = f"""Hi {student_name},
 
-Your one-time verification code (OTP) for Focus Sessions is: {otp_code}
+Your one-time verification code (OTP) for MindSet is: {otp_code}
 
 This code is valid for 5 minutes. Please enter it on the website to reserve your free 15-minute micro-coaching session.
 
 Best regards,
-The Focus Sessions Team
+The MindSet Team
 """
 
     html_body = f"""
@@ -99,7 +99,7 @@ The Focus Sessions Team
     <html>
     <body style="font-family: Arial, sans-serif; background-color: #f8fafc; padding: 20px; color: #334155;">
         <div style="max-width: 480px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 12px; border: 1px solid #e2e8f0;">
-            <h2 style="color: #4f46e5; margin-top: 0;">🎯 Focus Sessions</h2>
+            <h2 style="color: #4f46e5; margin-top: 0;">🧠 MindSet</h2>
             <p style="font-size: 16px;">Hi <strong>{student_name}</strong>,</p>
             <p style="font-size: 15px;">Your verification code to reserve your 15-minute micro-coaching session is:</p>
             <div style="background-color: #eef2ff; border: 2px dashed #4f46e5; border-radius: 8px; padding: 16px; text-align: center; margin: 20px 0;">
