@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/send-otp",
+      "destination": "/api/send-otp.js"
+    },
+    {
+      "source": "/api/verify-otp",
+      "destination": "/api/verify-otp.js"
+    },
+    {
+      "source": "/api/config",
+      "destination": "/api/config.js"
+    }
+  ]
+}

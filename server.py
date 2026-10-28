@@ -510,21 +510,21 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
                     sent_real = True
                     delivery_note = note_c
 
+        token = f"simulated_{int(time.time())}"
         if sent_real:
             self._send_json({
                 "success": True,
                 "mode": "real",
-                # Retained for the older production client, which checks
-                # result.dispatch.success before showing the real-delivery UI.
+                "token": token,
                 "dispatch": {"success": True},
                 "message": f"Verification code sent to {contact}.",
                 "delivery_note": delivery_note
             })
         else:
-            # Zero-setup demo/fallback mode: returns OTP code in payload so website displays toast
             self._send_json({
                 "success": True,
                 "mode": "simulated",
+                "token": token,
                 "dispatch": {"success": False},
                 "otp": otp_code,
                 "simulated_otp": otp_code,

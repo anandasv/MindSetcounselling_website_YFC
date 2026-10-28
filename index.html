@@ -9,13 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <!-- Optional EmailJS SDK for zero-backend direct email sending -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
-    <!-- Top Notification Bar -->
+    <!-- Top Announcement Bar -->
     <div class="announcement-bar">
-        <span>✨ <strong>Limited Free Trial:</strong> First 15-minute session is 100% free — No card needed</span>
+        <span>✨ <strong>Limited Offer:</strong> First 15-minute introductory session is 100% free — Packages start from ₹300</span>
     </div>
 
     <div class="page-container">
@@ -27,14 +26,14 @@
             </div>
             <div class="nav-actions">
                 <a href="#quick-timer" class="nav-link">Try Mini-Timer</a>
-                <a href="#booking" class="btn-primary-sm">Book Free Session</a>
+                <a href="#booking" class="btn-primary-sm">Book Session</a>
             </div>
         </nav>
 
         <!-- Hero Section -->
         <header class="hero-section">
             <div class="hero-badge">⚡ Quick • Judgment-Free • Student-First</div>
-            <h1 class="hero-title">Stop Scrolling. Start Finishing in 15 Minutes.</h1>
+            <h1 class="hero-title">Stop Scrolling. Start Finishing in <span class="gold-text">15 Minutes</span>.</h1>
             <p class="hero-subtitle">
                 Feeling overwhelmed or stuck in a social media loop? Jump into a quick 1-on-1 online micro-session with a friendly peer coach who understands your struggles.
             </p>
@@ -45,8 +44,8 @@
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat-item">
-                    <span class="stat-number">75-85%</span>
-                    <span class="stat-label">Success Rate</span>
+                    <span class="stat-number">₹300</span>
+                    <span class="stat-label">Starting package</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat-item">
@@ -56,51 +55,63 @@
             </div>
         </header>
 
-        <!-- Main Booking Flow -->
+        <!-- =============================================================== -->
+        <!-- 1. BOOKING FLOW                                                 -->
+        <!-- =============================================================== -->
         <section class="booking-section" id="booking">
             <div class="card-header">
                 <div class="step-indicator">
                     <div class="step-pill active" id="step1Pill">1. Details</div>
-                    <div class="step-line" id="stepLine"></div>
+                    <div class="step-line" id="stepLine1"></div>
                     <div class="step-pill" id="step2Pill">2. Verification</div>
                     <div class="step-line" id="stepLine2"></div>
-                    <div class="step-pill" id="step3Pill">3. Confirmed</div>
+                    <div class="step-pill" id="step3Pill">3. Package</div>
+                    <div class="step-line" id="stepLine3"></div>
+                    <div class="step-pill" id="step4Pill">4. Confirmed</div>
                 </div>
                 <h2 id="bookingTitle">Book Your 15-Minute Session</h2>
-                <p id="bookingSubtitle" class="text-muted">Choose your preferred time & verify your contact details to reserve your spot.</p>
+                <p id="bookingSubtitle" class="text-muted">Choose your preferred time & verify contact details to reserve your coaching spot.</p>
             </div>
 
             <!-- STEP 1: Main Form -->
             <form id="bookingForm" class="booking-form" novalidate>
-
-                <!-- "I am" role dropdown — full width above the name/contact grid -->
+                <!-- Role Dropdown Menu -->
                 <div class="form-group" id="roleFormGroup">
                     <label for="userRole">I am <span class="req">*</span></label>
                     <select id="userRole" name="role" required>
-                        <option value="">-- Select who you are --</option>
-                        <option value="A Student">🎒 A Student</option>
+                        <option value="A Student" selected>🎒 A Student</option>
                         <option value="A Parent">👨‍👩‍👧 A Parent</option>
                         <option value="A Guardian">🛡️ A Guardian</option>
                         <option value="A Teacher">📖 A Teacher</option>
                         <option value="Other">✨ Other</option>
                     </select>
-                    <span class="error-text" id="roleError">Please let us know who you are</span>
+                    <span class="error-text" id="roleError">Please select who you are</span>
                 </div>
 
-                <div class="form-grid">
-                    <div class="form-group" id="nameFormGroup">
-                        <label for="userName">Your Full Name <span class="req">*</span></label>
-                        <input type="text" id="userName" name="name" required placeholder="e.g. Alex Johnson" autocomplete="name">
-                        <span class="error-text" id="nameError">Please enter your name</span>
+                <!-- Dynamic Contact & Names Grid -->
+                <div class="form-grid" id="namesGrid">
+                    <!-- Parent Name Field (Active only when Parent/Guardian is selected) -->
+                    <div class="form-group" id="parentNameFormGroup" style="display: none;">
+                        <label for="parentName">Parent / Guardian Full Name <span class="req">*</span></label>
+                        <input type="text" id="parentName" name="parentName" placeholder="e.g. Sarah Johnson" autocomplete="name">
+                        <span class="error-text" id="parentNameError">Please enter parent/guardian full name</span>
                     </div>
 
+                    <!-- Student Name Field (Always visible) -->
+                    <div class="form-group" id="nameFormGroup">
+                        <label for="userName" id="userNameLabel">Student's Full Name <span class="req">*</span></label>
+                        <input type="text" id="userName" name="name" required placeholder="e.g. Alex Johnson" autocomplete="name">
+                        <span class="error-text" id="nameError">Please enter student's name</span>
+                    </div>
+
+                    <!-- Contact Address (Email / Phone) -->
                     <div class="form-group" id="contactFormGroup">
-                        <label for="userContact">Email Address or Mobile Number <span class="req">*</span></label>
+                        <label for="userContact" id="userContactLabel">Student Email Address or Mobile Number <span class="req">*</span></label>
                         <div class="input-with-badge">
                             <input type="text" id="userContact" name="contact" required placeholder="name@example.com or (555) 000-0000" autocomplete="email tel">
                             <span class="contact-type-badge" id="contactTypeBadge">Email / SMS</span>
                         </div>
-                        <span class="helper-text">We'll send a one-time verification code (OTP) to this address.</span>
+                        <span class="helper-text" id="contactHelperText">We'll send a one-time verification code (OTP) to this address.</span>
                         <span class="error-text" id="contactError">Please enter a valid email address or 10-digit phone number</span>
                     </div>
                 </div>
@@ -135,29 +146,29 @@
                 </div>
 
                 <div class="form-group" id="topicFormGroup">
-                    <label for="topic">What's your biggest focus challenge right now? <span class="req">*</span></label>
+                    <label for="topic">What's your primary focus challenge right now? <span class="req">*</span></label>
                     <select id="topic" required>
-                        <option value="">-- Select a primary topic --</option>
-                        <option value="📱 Endless phone / TikTok / Instagram scrolling">📱 Endless phone / TikTok / Instagram scrolling</option>
-                        <option value="📝 Procrastinating on big papers & assignments">📝 Procrastinating on big papers & assignments</option>
+                        <option value="">-- Select a primary challenge --</option>
+                        <option value="📱 Endless phone / TikTok / Instagram scrolling">📱 Endless phone / Reels / Gaming scrolling</option>
+                        <option value="📝 Procrastinating on big papers & assignments">📝 Procrastinating on big papers & homework</option>
                         <option value="🗓️ Creating a consistent daily study routine">🗓️ Creating a consistent daily study routine</option>
                         <option value="🧠 Overwhelmed & anxious about upcoming exams">🧠 Overwhelmed & anxious about upcoming exams</option>
                         <option value="😴 Bad sleep cycles & low daytime energy">😴 Bad sleep cycles & low daytime energy</option>
-                        <option value="⚡ Just need accountability to get started">⚡ Just need accountability to get started</option>
+                        <option value="⚡ Just need accountability to get started">⚡ Just need live accountability to get started</option>
                     </select>
                     <span class="error-text" id="topicError">Please choose a topic to guide your session</span>
                 </div>
 
                 <div class="form-group">
                     <label for="goalNotes">What do you want to accomplish in the next 24 hours? <span class="opt">(Optional)</span></label>
-                    <textarea id="goalNotes" rows="2" placeholder="e.g. Finish 3 pages of my history paper and outline chapter 4..."></textarea>
+                    <textarea id="goalNotes" rows="2" placeholder="e.g. Finish 3 pages of history revision and create chapter flashcards..."></textarea>
                 </div>
 
                 <button type="submit" class="book-btn" id="submitFormBtn">
                     <span id="btnText">Send Verification Code & Continue</span>
                     <span class="btn-arrow" id="btnArrow">→</span>
                 </button>
-                <div class="privacy-note">🔒 100% confidential. We never spam or sell your info.</div>
+                <div class="privacy-note">🔒 100% confidential. No spam ever.</div>
             </form>
 
             <!-- STEP 2: OTP Verification Step -->
@@ -167,7 +178,7 @@
                     <h3>Verify Your Contact Info</h3>
                     <p class="otp-instructions">
                         We sent a 6-digit verification code to: <br>
-                        <strong id="otpTargetDisplay">student@example.com</strong>
+                        <strong id="otpTargetDisplay">contact@example.com</strong>
                     </p>
                 </div>
 
@@ -175,9 +186,9 @@
 
                 <!-- Simulation Info Banner -->
                 <div class="demo-otp-banner" id="demoOtpBanner" style="display: none;">
-                    <div class="banner-tag">DEMO MODE ACTIVE</div>
-                    <p>Your simulated OTP code is: <strong id="simulatedOtpCode" class="otp-highlight">123456</strong></p>
-                    <button type="button" class="btn-copy-otp" id="autoFillOtpBtn">⚡ Click to Auto-Fill</button>
+                    <div class="banner-tag">DEMO CODE (TEST MODE)</div>
+                    <p>Verification Code: <strong id="simulatedOtpCode" class="otp-highlight">123456</strong></p>
+                    <button type="button" class="btn-copy-otp" id="autoFillOtpBtn">⚡ Auto-Fill Code</button>
                 </div>
 
                 <form id="otpForm" class="otp-form">
@@ -192,7 +203,7 @@
                     <span class="error-text" id="otpError" style="text-align: center;">Invalid code. Please try again.</span>
 
                     <button type="submit" class="book-btn verify-btn" id="verifyOtpBtn">
-                        Confirm & Reserve My Free Session
+                        Verify & Choose Package →
                     </button>
                 </form>
 
@@ -202,25 +213,139 @@
                 </div>
 
                 <div class="otp-back-link">
-                    <button type="button" class="btn-text-link" id="editContactBtn">← Change email / phone number</button>
+                    <button type="button" class="btn-text-link" id="editContactBtn">← Change details or contact address</button>
                 </div>
             </div>
 
-            <!-- STEP 3: Booking Success Confirmation -->
+            <!-- STEP 3: Package Selection Step -->
+            <div class="package-selection-container" id="packageSection" style="display: none;">
+                <div class="package-header">
+                    <div class="otp-icon-circle">💎</div>
+                    <h3>Select Your MindSet Package</h3>
+                    <p class="text-muted">Choose a tailored micro-coaching plan for guaranteed focus and progress.</p>
+                </div>
+
+                <div class="package-grid">
+                    <!-- Package 1: Single Session -->
+                    <div class="package-card selected" data-package-id="1-session" data-name="One Session" data-price="300" data-sessions="1">
+                        <div class="package-card-top">
+                            <div>
+                                <div class="package-name">One Session</div>
+                                <div class="package-price-sub">Single Focus Reset</div>
+                            </div>
+                            <div class="package-radio"></div>
+                        </div>
+                        <div class="package-price-wrap">
+                            <div class="package-price">₹300</div>
+                            <div class="package-price-sub">One 15-minute 1-on-1 sprint</div>
+                        </div>
+                        <ul class="package-features">
+                            <li>1x 15-Minute 1-on-1 Peer Coaching</li>
+                            <li>Instant procrastination diagnostic</li>
+                            <li>Personalized next-step action plan</li>
+                        </ul>
+                    </div>
+
+                    <!-- Package 2: 5 Sessions -->
+                    <div class="package-card" data-package-id="5-sessions" data-name="5 Sessions" data-price="1299" data-sessions="5">
+                        <div class="package-badge-tag">POPULAR</div>
+                        <div class="package-card-top">
+                            <div>
+                                <div class="package-name">5 Sessions</div>
+                                <div class="package-price-sub">Weekly Momentum Builder</div>
+                            </div>
+                            <div class="package-radio"></div>
+                        </div>
+                        <div class="package-price-wrap">
+                            <div class="package-price">₹1,299</div>
+                            <div class="package-price-sub">₹260 / session • Save ₹201</div>
+                        </div>
+                        <ul class="package-features">
+                            <li>5x 15-Minute 1-on-1 Peer Sessions</li>
+                            <li>Daily study routine blueprint</li>
+                            <li>WhatsApp accountability check-ins</li>
+                            <li>Anti-distraction phone friction rules</li>
+                        </ul>
+                    </div>
+
+                    <!-- Package 3: 10 Sessions -->
+                    <div class="package-card" data-package-id="10-sessions" data-name="10 Sessions" data-price="2799" data-sessions="10">
+                        <div class="package-badge-tag">BEST VALUE</div>
+                        <div class="package-card-top">
+                            <div>
+                                <div class="package-name">10 Sessions</div>
+                                <div class="package-price-sub">Habit & Exam Mastery</div>
+                            </div>
+                            <div class="package-radio"></div>
+                        </div>
+                        <div class="package-price-wrap">
+                            <div class="package-price">₹2,799</div>
+                            <div class="package-price-sub">₹280 / session • Save ₹201</div>
+                        </div>
+                        <ul class="package-features">
+                            <li>10x 15-Minute 1-on-1 Peer Sessions</li>
+                            <li>Exam stress & revision roadmap</li>
+                            <li>Priority mentor scheduling</li>
+                            <li>Weekly progress recap for parents/students</li>
+                        </ul>
+                    </div>
+
+                    <!-- Package 4: 15 Sessions -->
+                    <div class="package-card" data-package-id="15-sessions" data-name="15 Sessions" data-price="4299" data-sessions="15">
+                        <div class="package-badge-tag">SEMESTER PASS</div>
+                        <div class="package-card-top">
+                            <div>
+                                <div class="package-name">15 Sessions</div>
+                                <div class="package-price-sub">Full Academic Transformation</div>
+                            </div>
+                            <div class="package-radio"></div>
+                        </div>
+                        <div class="package-price-wrap">
+                            <div class="package-price">₹4,299</div>
+                            <div class="package-price-sub">₹286 / session • Complete Support</div>
+                        </div>
+                        <ul class="package-features">
+                            <li>15x 15-Minute 1-on-1 Peer Sessions</li>
+                            <li>All-inclusive full term accountability</li>
+                            <li>Direct coach chat access on WhatsApp</li>
+                            <li>Custom exam & study cycle strategy</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button type="button" class="book-btn package-confirm-btn" id="confirmPackageBtn">
+                    <span>Confirm & Reserve My Package</span>
+                    <span class="btn-arrow">→</span>
+                </button>
+
+                <div class="otp-back-link">
+                    <button type="button" class="btn-text-link" id="backToOtpBtn">← Back to Verification</button>
+                </div>
+            </div>
+
+            <!-- STEP 4: Booking Success Confirmation -->
             <div class="success-message" id="successMessage" style="display: none;">
                 <div class="success-icon-wrapper">
                     <div class="checkmark-circle">✓</div>
                 </div>
                 <h3>Session Confirmed! 🎉</h3>
-                <p class="success-tagline">You've taken the first step to conquering procrastination.</p>
+                <p class="success-tagline">You've taken the first big step to conquering procrastination.</p>
                 
                 <div class="session-receipt">
                     <div class="receipt-row">
                         <span class="receipt-label">Student:</span>
                         <span class="receipt-val" id="receiptName">Alex Johnson</span>
                     </div>
+                    <div class="receipt-row" id="receiptParentRow" style="display: none;">
+                        <span class="receipt-label">Parent / Guardian:</span>
+                        <span class="receipt-val" id="receiptParentName">Sarah Johnson</span>
+                    </div>
                     <div class="receipt-row">
-                        <span class="receipt-label">Scheduled Time:</span>
+                        <span class="receipt-label">Selected Package:</span>
+                        <span class="receipt-val gold" id="receiptPackage">One Session (₹300)</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Scheduled First Session:</span>
                         <span class="receipt-val" id="receiptTime">Today at 10:00 AM (15 Mins)</span>
                     </div>
                     <div class="receipt-row">
@@ -228,7 +353,7 @@
                         <span class="receipt-val" id="receiptContact">alex@example.com</span>
                     </div>
                     <div class="receipt-row">
-                        <span class="receipt-label">Topic:</span>
+                        <span class="receipt-label">Focus Challenge:</span>
                         <span class="receipt-val" id="receiptTopic">Social Media Distraction</span>
                     </div>
                 </div>
@@ -243,43 +368,47 @@
                 </div>
 
                 <div class="prep-tips">
-                    <h4>💡 What to expect next:</h4>
+                    <h4>💡 What happens next:</h4>
                     <ul>
-                        <li>We just sent a calendar invite link to your contact details.</li>
-                        <li>Your peer mentor will ping you 5 minutes before the session.</li>
-                        <li>No preparation required — just bring whatever you're currently working on!</li>
+                        <li>A confirmation link & calendar invite have been dispatched to your contact address.</li>
+                        <li>Your Mind Mentor will reach out 5 minutes before your scheduled sprint.</li>
+                        <li>No preparation required — simply have your current task or assignment ready!</li>
                     </ul>
                 </div>
             </div>
         </section>
 
-        <!-- Feature 3: Meet the Peer Focus Coaches -->
+        <!-- =============================================================== -->
+        <!-- 2. MEET YOUR MIND MENTORS                                       -->
+        <!-- =============================================================== -->
         <section class="coaches-section">
-            <h2>Meet Your Focus Mentors</h2>
-            <p class="section-sub">Friendly university students who beat their own procrastination habits and now coach others.</p>
+            <h2>Meet Your Mind Mentors</h2>
+            <p class="section-sub">Friendly university students & peer mentors who beat procrastination and now coach others.</p>
             <div class="coaches-grid">
                 <div class="coach-card">
                     <div class="coach-avatar">🎓</div>
-                    <h4>Counsellor 1</h4>
-                    <span class="coach-specialty">Profession • Specialises in:</span>
+                    <h4>Jordan K.</h4>
+                    <span class="coach-specialty">Pre-Med Mentor • Time Management</span>
                     <p>"I went from cramming all night to sleeping 8 hours by breaking tasks into 15-minute friction-free micro-goals."</p>
                 </div>
                 <div class="coach-card">
                     <div class="coach-avatar">💻</div>
-                    <h4>Counsellor 2</h4>
-                    <span class="coach-specialty">Profession • Specialises in: </span>
+                    <h4>Maya S.</h4>
+                    <span class="coach-specialty">CS Sophomore • Social Media Detox</span>
                     <p>"I'll help you lock your phone triggers and get your coding / writing assignments out of your head onto paper."</p>
                 </div>
                 <div class="coach-card">
                     <div class="coach-avatar">📚</div>
-                    <h4>Counsellor 3</h4>
-                    <span class="coach-specialty">Profession • Specialises in:</span>
+                    <h4>David R.</h4>
+                    <span class="coach-specialty">Law Student • Exam Stress & Memory</span>
                     <p>"Panic before tests is totally normal. Let's build a relaxed 3-day revision sprint you can actually stick to."</p>
                 </div>
             </div>
         </section>
 
-        <!-- Feature 2: Why It Works -->
+        <!-- =============================================================== -->
+        <!-- 3. WHY MICRO-SESSIONS WORK BETTER THAN WILLPOWER                -->
+        <!-- =============================================================== -->
         <section class="features-section">
             <h2>Why Micro-Sessions Work Better Than Willpower</h2>
             <div class="features">
@@ -306,7 +435,9 @@
             </div>
         </section>
 
-        <!-- Interactive Feature 1: 15-Minute Focus Previewer -->
+        <!-- =============================================================== -->
+        <!-- 4. 15 MIN SPRINT TIMER                                          -->
+        <!-- =============================================================== -->
         <section class="mini-tool-section" id="quick-timer">
             <div class="section-badge">✨ Try It Now</div>
             <h2>Can't wait? Try a 15-Minute Solo Sprint</h2>
@@ -336,11 +467,13 @@
             </div>
         </section>
 
-        <!-- FAQ Section with interactive accordion -->
+        <!-- =============================================================== -->
+        <!-- 5. FAQs                                                         -->
+        <!-- =============================================================== -->
         <section class="faq-section">
             <h2>Frequently Asked Questions</h2>
             <div class="faq-accordion">
-                <details class="faq-item">
+                <details class="faq-item" open>
                     <summary>How long is a session and how do we meet?</summary>
                     <div class="faq-answer">
                         <p>Each session is strictly 15 minutes. Once confirmed via OTP, you'll receive a one-click web link (or WhatsApp/Zoom/SMS call link depending on your preference). No special app downloads required!</p>
@@ -348,9 +481,16 @@
                 </details>
 
                 <details class="faq-item">
-                    <summary>Is the first session really 100% free?</summary>
+                    <summary>Can parents book sessions on behalf of their children?</summary>
                     <div class="faq-answer">
-                        <p>Yes! Your first 15-minute trial session is completely free. We do not ask for any credit card or payment details.</p>
+                        <p>Yes! Simply select "A Parent" in the booking form. We'll collect your contact information for billing & updates, and ask for the student's name for the coach to personalize the session.</p>
+                    </div>
+                </details>
+
+                <details class="faq-item">
+                    <summary>What packages do you offer?</summary>
+                    <div class="faq-answer">
+                        <p>We offer 4 flexible coaching packages: <strong>1 Session (₹300)</strong>, <strong>5 Sessions (₹1,299)</strong>, <strong>10 Sessions (₹2,799)</strong>, and <strong>15 Sessions (₹4,299)</strong>. All packages include 1-on-1 personalized micro-coaching.</p>
                     </div>
                 </details>
 
@@ -370,24 +510,26 @@
             </div>
         </section>
 
-        <!-- Testimonials -->
+        <!-- =============================================================== -->
+        <!-- 6. REVIEWS                                                      -->
+        <!-- =============================================================== -->
         <section class="testimonials-section">
-            <h2>What Students Are Saying</h2>
+            <h2>What Students & Parents Are Saying</h2>
             <div class="testimonials-grid">
                 <div class="testimonial">
                     <div class="stars">★★★★★</div>
                     <p>"I was wasting 4 hours every evening between Instagram reels and Discord. One 15-min call helped me set up app friction rules, and now I finish homework before dinner."</p>
-                    <span class="testimonial-author">— Student Reviewer 1</span>
+                    <span class="testimonial-author">— Alex T., High School Junior</span>
                 </div>
                 <div class="testimonial">
                     <div class="stars">★★★★★</div>
-                    <p>"Having an empathetic coach to talk to who didn't shame me for falling behind completely changed my semester."</p>
-                    <span class="testimonial-author">— Student Reviewer 2</span>
+                    <p>"As a parent, I was stressed about my son's exam anxiety. Booking the 5-session package gave him practical routines without any lectures or arguments."</p>
+                    <span class="testimonial-author">— Sunita M., Parent</span>
                 </div>
                 <div class="testimonial">
                     <div class="stars">★★★★★</div>
-                    <p>"The 15-minute limit is genius. It doesn't feel like a therapy session or a lecture, just a quick tactical reset."</p>
-                    <span class="testimonial-author">— Student Reviewer 3</span>
+                    <p>"The 15-minute limit is genius. It doesn't feel like therapy or school, just a quick tactical reset that gets me unblocked."</p>
+                    <span class="testimonial-author">— Ethan G., Grade 11 Student</span>
                 </div>
             </div>
         </section>
@@ -396,18 +538,18 @@
         <footer class="footer">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <span class="logo-icon">🎯</span>
-                    <span class="logo-text"><strong>MindSet</strong></span>
+                    <span class="logo-icon">🧠</span>
+                    <span class="logo-text">Mind<strong>Set</strong></span>
                     <p>Empowering students to overcome distractions and study with confidence.</p>
                 </div>
                 <div class="footer-links">
                     <h4>Support & Contact</h4>
                     <p>Email: <a href="mailto:mindsetsupportcenter@gmail.com">mindsetsupportcenter@gmail.com</a></p>
-                    <p>Hours: Mon–Sat, 10.00 AM – 8.30 PM EST</p>
+                    <p>Hours: Mon–Sat, 10.00 AM – 8.30 PM IST</p>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 MindSet Inc. All rights reserved. • Services available exclusively within the territory of India.</p>
+                <p>&copy; 2026 MindSet Inc. All rights reserved. • Built for student success.</p>
             </div>
         </footer>
     </div>

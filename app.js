@@ -1,5 +1,6 @@
 /**
- * Focus Sessions - Application Logic & Real OTP System
+ * MindSet - Application Logic & Real OTP System
+ * Supports Vercel Serverless & Local Python Backend
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -7,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // App State
     // -------------------------------------------------------------------------
     const state = {
+        role: 'A Student',
+        parentName: '',
         name: '',
         contact: '',
         contactType: 'email', // 'email' or 'sms'
@@ -14,9 +17,20 @@ document.addEventListener('DOMContentLoaded', () => {
         time: '10:00 AM',
         topic: '',
         goalNotes: '',
+        
+        // OTP State
         activeOtpCode: '', // Simulated or returned OTP code
+        otpToken: '',      // Signed HMAC token for stateless verification
         resendTimerCount: 45,
         resendInterval: null,
+
+        // Package State
+        selectedPackage: {
+            id: '1-session',
+            name: 'One Session',
+            price: '300',
+            sessions: 1
+        },
         
         // Solo Sprint Timer State
         timerSeconds: 15 * 60,
@@ -30,29 +44,42 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     // -------------------------------------------------------------------------
     const step1Pill = document.getElementById('step1Pill');
-    const stepLine = document.getElementById('stepLine');
+    const stepLine1 = document.getElementById('stepLine1');
     const step2Pill = document.getElementById('step2Pill');
     const stepLine2 = document.getElementById('stepLine2');
     const step3Pill = document.getElementById('step3Pill');
+    const stepLine3 = document.getElementById('stepLine3');
+    const step4Pill = document.getElementById('step4Pill');
     const bookingTitle = document.getElementById('bookingTitle');
     const bookingSubtitle = document.getElementById('bookingSubtitle');
 
+    // Step 1: Booking Form Elements
     const bookingForm = document.getElementById('bookingForm');
+    const userRoleSelect = document.getElementById('userRole');
+    const parentNameFormGroup = document.getElementById('parentNameFormGroup');
+    const parentNameInput = document.getElementById('parentName');
+    const parentNameError = document.getElementById('parentNameError');
+    const nameFormGroup = document.getElementById('nameFormGroup');
+    const userNameLabel = document.getElementById('userNameLabel');
     const userNameInput = document.getElementById('userName');
+    const nameError = document.getElementById('nameError');
+
+    const contactFormGroup = document.getElementById('contactFormGroup');
+    const userContactLabel = document.getElementById('userContactLabel');
     const userContactInput = document.getElementById('userContact');
+    const contactHelperText = document.getElementById('contactHelperText');
+    const contactError = document.getElementById('contactError');
     const contactTypeBadge = document.getElementById('contactTypeBadge');
+
     const topicSelect = document.getElementById('topic');
+    const topicFormGroup = document.getElementById('topicFormGroup');
     const goalNotesInput = document.getElementById('goalNotes');
     const selectedTimeInput = document.getElementById('selectedTime');
     const selectedDayInput = document.getElementById('selectedDay');
     const submitFormBtn = document.getElementById('submitFormBtn');
     const btnText = document.getElementById('btnText');
 
-    const nameFormGroup = document.getElementById('nameFormGroup');
-    const contactFormGroup = document.getElementById('contactFormGroup');
-    const topicFormGroup = document.getElementById('topicFormGroup');
-
-    // OTP Section Elements
+    // Step 2: OTP Section Elements
     const otpSection = document.getElementById('otpSection');
     const otpTargetDisplay = document.getElementById('otpTargetDisplay');
     const deliveryToast = document.getElementById('deliveryToast');
@@ -68,9 +95,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const resendOtpBtn = document.getElementById('resendOtpBtn');
     const editContactBtn = document.getElementById('editContactBtn');
 
-    // Receipt / Success Elements
+    // Step 3: Package Section Elements
+    const packageSection = document.getElementById('packageSection');
+    const packageCards = document.querySelectorAll('.package-card');
+    const confirmPackageBtn = document.getElementById('confirmPackageBtn');
+    const backToOtpBtn = document.getElementById('backToOtpBtn');
+
+    // Step 4: Success / Receipt Elements
     const successMessage = document.getElementById('successMessage');
     const receiptName = document.getElementById('receiptName');
+    const receiptParentRow = document.getElementById('receiptParentRow');
+    const receiptParentName = document.getElementById('receiptParentName');
+    const receiptPackage = document.getElementById('receiptPackage');
     const receiptTime = document.getElementById('receiptTime');
     const receiptContact = document.getElementById('receiptContact');
     const receiptTopic = document.getElementById('receiptTopic');
@@ -85,6 +121,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const soundPills = document.querySelectorAll('.sound-pill');
 
     // -------------------------------------------------------------------------
+    // Role Dropdown: Dynamic Field Display (Parent vs Student vs Teacher)
+    // -------------------------------------------------------------------------
+    function handleRoleChange() {
+        const role = userRoleSelect ? userRoleSelect.value : 'A Student';
+        state.role = role;
+
+        if (role === 'A Parent' || role === 'A Guardian') {
+            if (parentNameFormGroup) parentNameFormGroup.style.display = 'block';
+            if (parentNameInput) parentNameInput.setAttribute('required', 'required');
+            if (userNameLabel) userNameLabel.innerHTML = 'Student\'s Full Name <span class="req">*</span>';
+            if (userNameInput) userNameInput.placeholder = 'e.g. Alex Johnson';
+            if (userContactLabel) userContactLabel.innerHTML = 'Parent / Guardian Contact <span class="req">*</span>';
+            if (userContactInput) userContactInput.placeholder = 'parent@example.com or (555) 000-0000';
+            if (contactHelperText) contactHelperText.textContent = "We\'ll send the one-time verification code (OTP) to the parent\'s contact.";
+        } else if (role === 'A Student') {
+            if (parentNameFormGroup) {
+                parentNameFormGroup.style.display = 'none';
+                parentNameFormGroup.classList.remove('has-error');
+            }
+            if (parentNameInput) {
+                parentNameInput.removeAttribute('required');
+                parentNameInput.value = '';
+            }
+            if (userNameLabel) userNameLabel.innerHTML = 'Student\'s Full Name <span class="req">*</span>';
+            if (userNameInput) userNameInput.placeholder = 'e.g. Alex Johnson';
+            if (userContactLabel) userContactLabel.innerHTML = 'Student Email Address or Mobile Number <span class="req">*</span>';
+            if (userContactInput) userContactInput.placeholder = 'name@example.com or (555) 000-0000';
+            if (contactHelperText) contactHelperText.textContent = "We\'ll send a one-time verification code (OTP) to your address.";
+        } else {
+            // Teacher or Other
+            if (parentNameFormGroup) {
+                parentNameFormGroup.style.display = 'none';
+                parentNameFormGroup.classList.remove('has-error');
+            }
+            if (parentNameInput) {
+                parentNameInput.removeAttribute('required');
+                parentNameInput.value = '';
+            }
+            if (userNameLabel) userNameLabel.innerHTML = 'Your Full Name <span class="req">*</span>';
+            if (userNameInput) userNameInput.placeholder = 'e.g. Prof. Smith';
+            if (userContactLabel) userContactLabel.innerHTML = 'Your Email Address or Mobile Number <span class="req">*</span>';
+            if (userContactInput) userContactInput.placeholder = 'name@example.com or (555) 000-0000';
+            if (contactHelperText) contactHelperText.textContent = "We\'ll send a one-time verification code (OTP) to this address.";
+        }
+    }
+
+    if (userRoleSelect) {
+        userRoleSelect.addEventListener('change', handleRoleChange);
+        handleRoleChange();
+    }
+
+    // -------------------------------------------------------------------------
     // Time Validation Logic (Disables Past Time Slots ONLY for Today)
     // -------------------------------------------------------------------------
     function updateTimeSlots() {
@@ -92,24 +180,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentHours = now.getHours();
         const currentMinutes = now.getMinutes();
 
-        // Read selected day from hidden input or fallback state
         const selectedDay = selectedDayInput ? selectedDayInput.value : state.day;
 
         document.querySelectorAll('.time-btn').forEach(button => {
             const statusSpan = button.querySelector('.time-status');
             const originalStatus = button.getAttribute('data-original-status') || 'Available';
 
-            // IF NOT TODAY: Re-enable all slots and restore status text
             if (selectedDay !== 'Today') {
                 button.disabled = false;
                 button.classList.remove('disabled');
-                if (statusSpan) {
-                    statusSpan.textContent = originalStatus;
-                }
+                if (statusSpan) statusSpan.textContent = originalStatus;
                 return;
             }
 
-            // IF TODAY: Compare time slot against current system time
             const timeString = button.getAttribute('data-time');
             if (!timeString) return;
 
@@ -125,7 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 button.disabled = true;
                 button.classList.add('disabled');
                 button.classList.remove('active');
-
                 if (statusSpan) statusSpan.textContent = 'Passed';
             } else {
                 button.disabled = false;
@@ -134,22 +216,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Clear selection if currently active button becomes disabled
         const activeBtn = document.querySelector('.time-btn.active');
         if (activeBtn && activeBtn.disabled) {
             activeBtn.classList.remove('active');
-            selectedTimeInput.value = '';
+            if (selectedTimeInput) selectedTimeInput.value = '';
             state.time = '';
         }
     }
 
-    // Save initial status labels so we can restore them when toggling off "Today"
     document.querySelectorAll('.time-btn').forEach(btn => {
         const statusSpan = btn.querySelector('.time-status');
         if (statusSpan) {
             btn.setAttribute('data-original-status', statusSpan.textContent.trim());
         }
     });
+
+    updateTimeSlots();
 
     // -------------------------------------------------------------------------
     // Contact Type Auto-Detection (Email vs Mobile SMS)
@@ -180,13 +262,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    userContactInput.addEventListener('input', (e) => {
-        detectContactType(e.target.value);
-        contactFormGroup.classList.remove('has-error');
-    });
+    if (userContactInput) {
+        userContactInput.addEventListener('input', (e) => {
+            detectContactType(e.target.value);
+            if (contactFormGroup) contactFormGroup.classList.remove('has-error');
+        });
+    }
 
-    userNameInput.addEventListener('input', () => nameFormGroup.classList.remove('has-error'));
-    topicSelect.addEventListener('change', () => topicFormGroup.classList.remove('has-error'));
+    if (userNameInput) {
+        userNameInput.addEventListener('input', () => {
+            if (nameFormGroup) nameFormGroup.classList.remove('has-error');
+        });
+    }
+
+    if (parentNameInput) {
+        parentNameInput.addEventListener('input', () => {
+            if (parentNameFormGroup) parentNameFormGroup.classList.remove('has-error');
+        });
+    }
+
+    if (topicSelect) {
+        topicSelect.addEventListener('change', () => {
+            if (topicFormGroup) topicFormGroup.classList.remove('has-error');
+        });
+    }
 
     // Date Chip & Time Option Selector Logic
     const dateChips = document.querySelectorAll('.date-chip');
@@ -196,10 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
             chip.classList.add('active');
             
             const selectedDayValue = chip.dataset.day;
-            selectedDayInput.value = selectedDayValue;
+            if (selectedDayInput) selectedDayInput.value = selectedDayValue;
             state.day = selectedDayValue;
 
-            // Recalculate available time slots whenever day changes
             updateTimeSlots();
         });
     });
@@ -210,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (btn.disabled) return;
             timeBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            selectedTimeInput.value = btn.dataset.time;
+            if (selectedTimeInput) selectedTimeInput.value = btn.dataset.time;
             state.time = btn.dataset.time;
         });
     });
@@ -218,58 +316,77 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------------------
     // STEP 1: Form Validation & Submit Handler
     // -------------------------------------------------------------------------
-    bookingForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        const nameVal = userNameInput.value.trim();
-        const contactVal = userContactInput.value.trim();
-        const topicVal = topicSelect.value;
-        state.goalNotes = goalNotesInput.value.trim();
+            const role = userRoleSelect ? userRoleSelect.value : 'A Student';
+            const nameVal = userNameInput ? userNameInput.value.trim() : '';
+            const contactVal = userContactInput ? userContactInput.value.trim() : '';
+            const topicVal = topicSelect ? topicSelect.value : '';
+            const parentNameVal = parentNameInput ? parentNameInput.value.trim() : '';
+            if (goalNotesInput) state.goalNotes = goalNotesInput.value.trim();
 
-        let isValid = true;
+            let isValid = true;
 
-        if (!nameVal) {
-            nameFormGroup.classList.add('has-error');
-            isValid = false;
-        } else {
-            nameFormGroup.classList.remove('has-error');
-        }
+            // If parent or guardian, parent name is mandatory
+            if (role === 'A Parent' || role === 'A Guardian') {
+                if (!parentNameVal) {
+                    if (parentNameFormGroup) parentNameFormGroup.classList.add('has-error');
+                    isValid = false;
+                } else {
+                    if (parentNameFormGroup) parentNameFormGroup.classList.remove('has-error');
+                }
+            }
 
-        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactVal);
-        const digits = contactVal.replace(/\D/g, '');
-        const isPhone = digits.length >= 10;
+            // Student/Personal name is always required
+            if (!nameVal) {
+                if (nameFormGroup) nameFormGroup.classList.add('has-error');
+                isValid = false;
+            } else {
+                if (nameFormGroup) nameFormGroup.classList.remove('has-error');
+            }
 
-        if (!contactVal || (!isEmail && !isPhone)) {
-            contactFormGroup.classList.add('has-error');
-            isValid = false;
-        } else {
-            contactFormGroup.classList.remove('has-error');
-        }
+            // Contact format check (email or 10-digit phone)
+            const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactVal);
+            const digits = contactVal.replace(/\D/g, '');
+            const isPhone = digits.length >= 10;
 
-        if (!topicVal) {
-            topicFormGroup.classList.add('has-error');
-            isValid = false;
-        } else {
-            topicFormGroup.classList.remove('has-error');
-        }
+            if (!contactVal || (!isEmail && !isPhone)) {
+                if (contactFormGroup) contactFormGroup.classList.add('has-error');
+                isValid = false;
+            } else {
+                if (contactFormGroup) contactFormGroup.classList.remove('has-error');
+            }
 
-        if (!isValid) return;
+            // Topic validation
+            if (!topicVal) {
+                if (topicFormGroup) topicFormGroup.classList.add('has-error');
+                isValid = false;
+            } else {
+                if (topicFormGroup) topicFormGroup.classList.remove('has-error');
+            }
 
-        state.name = nameVal;
-        state.contact = contactVal;
-        state.topic = topicVal;
+            if (!isValid) return;
 
-        submitFormBtn.disabled = true;
-        btnText.textContent = 'Generating & Sending Code...';
+            state.role = role;
+            state.parentName = parentNameVal;
+            state.name = nameVal;
+            state.contact = contactVal;
+            state.topic = topicVal;
 
-        await requestOtpDelivery();
+            if (submitFormBtn) submitFormBtn.disabled = true;
+            if (btnText) btnText.textContent = 'Generating & Sending Code...';
 
-        submitFormBtn.disabled = false;
-        btnText.textContent = 'Send Verification Code & Continue';
-    });
+            await requestOtpDelivery();
+
+            if (submitFormBtn) submitFormBtn.disabled = false;
+            if (btnText) btnText.textContent = 'Send Verification Code & Continue';
+        });
+    }
 
     // -------------------------------------------------------------------------
-    // Request OTP Delivery from Backend API
+    // Request OTP Delivery from Backend API (/api/send-otp)
     // -------------------------------------------------------------------------
     async function requestOtpDelivery() {
         try {
@@ -277,6 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    role: state.role,
+                    parentName: state.parentName,
                     name: state.name,
                     contact: state.contact,
                     day: state.day,
@@ -288,52 +407,63 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.success) {
+                if (data.token) state.otpToken = data.token;
                 transitionToStep2(data);
             } else {
-                alert(data.message || 'Failed to send verification code. Please try again.');
+                alert(data.message || 'Failed to send verification code. Please check details and try again.');
             }
         } catch (err) {
-            console.warn('Backend API connection issue, attempting client-side dispatch:', err);
+            console.warn('Backend API connection issue, falling back to instant client test mode:', err);
             handleClientFallbackOtp();
         }
     }
 
     function handleClientFallbackOtp() {
         const simulatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+        state.otpToken = 'simulated_' + Date.now();
         transitionToStep2({
             success: true,
             mode: 'simulated',
             otp: simulatedCode,
+            token: state.otpToken,
             delivery_note: 'Demo mode active.'
         });
     }
 
     function transitionToStep2(otpData) {
-        step1Pill.classList.remove('active');
-        step1Pill.classList.add('completed');
-        stepLine.classList.add('completed');
-        step2Pill.classList.add('active');
+        if (step1Pill) step1Pill.className = 'step-pill completed';
+        if (stepLine1) stepLine1.className = 'step-line completed';
+        if (step2Pill) step2Pill.className = 'step-pill active';
+        if (stepLine2) stepLine2.className = 'step-line';
+        if (step3Pill) step3Pill.className = 'step-pill';
+        if (stepLine3) stepLine3.className = 'step-line';
+        if (step4Pill) step4Pill.className = 'step-pill';
 
-        bookingTitle.textContent = 'Enter Verification Code';
-        bookingSubtitle.textContent = `Please enter the 6-digit verification code sent to ${state.contact}`;
+        if (bookingTitle) bookingTitle.textContent = 'Verify Contact Information';
+        if (bookingSubtitle) bookingSubtitle.textContent = `Please enter the 6-digit verification code sent to ${state.contact}`;
 
-        bookingForm.style.display = 'none';
-        otpSection.style.display = 'block';
-        otpTargetDisplay.textContent = state.contact;
+        if (bookingForm) bookingForm.style.display = 'none';
+        if (packageSection) packageSection.style.display = 'none';
+        if (successMessage) successMessage.style.display = 'none';
+        if (otpSection) otpSection.style.display = 'block';
 
-        if (otpData.mode === 'real') {
-            deliveryToast.style.display = 'block';
-            deliveryToast.className = 'delivery-toast success';
-            deliveryToast.innerHTML = `✅ <strong>Code Sent!</strong> ${otpData.delivery_note || `We sent an actual verification code to <code>${state.contact}</code>.`}`;
-            demoOtpBanner.style.display = 'none';
-        } else {
-            deliveryToast.style.display = 'block';
-            deliveryToast.className = 'delivery-toast notice';
-            deliveryToast.innerHTML = `ℹ️ <strong>Demo Delivery Mode:</strong> Server generated a verification code below for testing.`;
-            
-            demoOtpBanner.style.display = 'flex';
-            state.activeOtpCode = otpData.otp || '123456';
-            simulatedOtpCode.textContent = state.activeOtpCode;
+        if (otpTargetDisplay) otpTargetDisplay.textContent = state.contact;
+
+        if (deliveryToast) {
+            if (otpData.mode === 'real') {
+                deliveryToast.style.display = 'block';
+                deliveryToast.className = 'delivery-toast success';
+                deliveryToast.innerHTML = `✅ <strong>Code Sent!</strong> ${otpData.delivery_note || `Verification code dispatched to <code>${state.contact}</code>.`}`;
+                if (demoOtpBanner) demoOtpBanner.style.display = 'none';
+            } else {
+                deliveryToast.style.display = 'block';
+                deliveryToast.className = 'delivery-toast notice';
+                deliveryToast.innerHTML = `ℹ️ <strong>Demo Delivery Mode:</strong> Server generated a verification code below for test verification.`;
+                
+                if (demoOtpBanner) demoOtpBanner.style.display = 'flex';
+                state.activeOtpCode = otpData.otp || '123456';
+                if (simulatedOtpCode) simulatedOtpCode.textContent = state.activeOtpCode;
+            }
         }
 
         clearOtpInputs();
@@ -341,18 +471,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (otpDigitInputs.length > 0) otpDigitInputs[0].focus();
     }
 
-    autoFillOtpBtn.addEventListener('click', () => {
-        if (!state.activeOtpCode) return;
-        const digits = state.activeOtpCode.split('');
-        otpDigitInputs.forEach((input, idx) => {
-            if (digits[idx]) {
-                input.value = digits[idx];
-                input.classList.add('filled');
-            }
+    if (autoFillOtpBtn) {
+        autoFillOtpBtn.addEventListener('click', () => {
+            if (!state.activeOtpCode) return;
+            const digits = state.activeOtpCode.split('');
+            otpDigitInputs.forEach((input, idx) => {
+                if (digits[idx]) {
+                    input.value = digits[idx];
+                    input.classList.add('filled');
+                }
+            });
+            if (otpDigitInputs.length > 0) otpDigitInputs[otpDigitInputs.length - 1].focus();
+            if (otpError) otpError.style.display = 'none';
         });
-        if (otpDigitInputs.length >= 6) otpDigitInputs[5].focus();
-        otpError.style.display = 'none';
-    });
+    }
 
     // -------------------------------------------------------------------------
     // 6-Digit Segmented OTP Input Handling
@@ -362,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
             input.value = '';
             input.classList.remove('filled');
         });
-        otpError.style.display = 'none';
+        if (otpError) otpError.style.display = 'none';
     }
 
     otpDigitInputs.forEach((input, index) => {
@@ -379,7 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 input.classList.remove('filled');
             }
 
-            otpError.style.display = 'none';
+            if (otpError) otpError.style.display = 'none';
         });
 
         input.addEventListener('keydown', (e) => {
@@ -394,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         input.addEventListener('paste', (e) => {
             e.preventDefault();
-            const pastedData = (e.clipboardData || window.clipboardData)?.getData('text') || '';
+            const pastedData = (e.clipboardData || window.clipboardData).getData('text');
             const digits = pastedData.replace(/\D/g, '').slice(0, 6);
 
             if (digits) {
@@ -407,61 +539,75 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const focusIndex = Math.min(digits.length, otpDigitInputs.length - 1);
                 otpDigitInputs[focusIndex].focus();
-                otpError.style.display = 'none';
+                if (otpError) otpError.style.display = 'none';
             }
         });
     });
 
     // -------------------------------------------------------------------------
-    // STEP 2: Verify OTP Form Submit Handler
+    // STEP 2: Verify OTP Form Submit Handler -> Moves to STEP 3 (Packages)
     // -------------------------------------------------------------------------
-    otpForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    if (otpForm) {
+        otpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        let enteredCode = '';
-        otpDigitInputs.forEach(input => enteredCode += input.value.trim());
+            let enteredCode = '';
+            otpDigitInputs.forEach(input => enteredCode += input.value.trim());
 
-        if (enteredCode.length < 6) {
-            otpError.textContent = 'Please enter all 6 digits of your verification code.';
-            otpError.style.display = 'block';
-            return;
-        }
-
-        verifyOtpBtn.disabled = true;
-        verifyOtpBtn.textContent = 'Verifying...';
-
-        try {
-            const response = await fetch('/api/verify-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contact: state.contact,
-                    otp: enteredCode
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                transitionToStep3();
-            } else {
-                otpError.textContent = data.message || 'Invalid code. Please try again.';
-                otpError.style.display = 'block';
-                shakeOtpGroup();
+            if (enteredCode.length < 6) {
+                if (otpError) {
+                    otpError.textContent = 'Please enter all 6 digits of your verification code.';
+                    otpError.style.display = 'block';
+                }
+                return;
             }
-        } catch (err) {
-            if (state.activeOtpCode && enteredCode === state.activeOtpCode) {
-                transitionToStep3();
-            } else {
-                otpError.textContent = 'Invalid code. Please try again.';
-                otpError.style.display = 'block';
-                shakeOtpGroup();
-            }
-        }
 
-        verifyOtpBtn.disabled = false;
-        verifyOtpBtn.textContent = 'Confirm & Reserve My Free Session';
-    });
+            if (verifyOtpBtn) {
+                verifyOtpBtn.disabled = true;
+                verifyOtpBtn.textContent = 'Verifying...';
+            }
+
+            try {
+                const response = await fetch('/api/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contact: state.contact,
+                        otp: enteredCode,
+                        token: state.otpToken
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    transitionToStep3();
+                } else {
+                    if (otpError) {
+                        otpError.textContent = data.message || 'Invalid code. Please try again.';
+                        otpError.style.display = 'block';
+                    }
+                    shakeOtpGroup();
+                }
+            } catch (err) {
+                // Client fallback verification
+                if (state.activeOtpCode && enteredCode === state.activeOtpCode) {
+                    transitionToStep3();
+                } else {
+                    if (otpError) {
+                        otpError.textContent = 'Invalid code. Please try again.';
+                        otpError.style.display = 'block';
+                    }
+                    shakeOtpGroup();
+                }
+            }
+
+            if (verifyOtpBtn) {
+                verifyOtpBtn.disabled = false;
+                verifyOtpBtn.textContent = 'Verify & Choose Package →';
+            }
+        });
+    }
 
     function shakeOtpGroup() {
         const group = document.querySelector('.otp-input-group');
@@ -476,71 +622,163 @@ document.addEventListener('DOMContentLoaded', () => {
     function startResendTimer() {
         clearInterval(state.resendInterval);
         state.resendTimerCount = 45;
-        resendOtpBtn.disabled = true;
-        timerText.style.display = 'inline';
-        countdownTimer.textContent = state.resendTimerCount;
+        if (resendOtpBtn) resendOtpBtn.disabled = true;
+        if (timerText) timerText.style.display = 'inline';
+        if (countdownTimer) countdownTimer.textContent = state.resendTimerCount;
 
         state.resendInterval = setInterval(() => {
             state.resendTimerCount--;
-            countdownTimer.textContent = state.resendTimerCount;
+            if (countdownTimer) countdownTimer.textContent = state.resendTimerCount;
 
             if (state.resendTimerCount <= 0) {
                 clearInterval(state.resendInterval);
-                resendOtpBtn.disabled = false;
-                timerText.style.display = 'none';
+                if (resendOtpBtn) resendOtpBtn.disabled = false;
+                if (timerText) timerText.style.display = 'none';
             }
         }, 1000);
     }
 
-    resendOtpBtn.addEventListener('click', async () => {
-        deliveryToast.style.display = 'block';
-        deliveryToast.className = 'delivery-toast notice';
-        deliveryToast.innerHTML = `⏳ Sending a new verification code...`;
-        
-        await requestOtpDelivery();
-    });
+    if (resendOtpBtn) {
+        resendOtpBtn.addEventListener('click', async () => {
+            if (deliveryToast) {
+                deliveryToast.style.display = 'block';
+                deliveryToast.className = 'delivery-toast notice';
+                deliveryToast.innerHTML = `⏳ Sending a new verification code...`;
+            }
+            await requestOtpDelivery();
+        });
+    }
 
-    editContactBtn.addEventListener('click', () => {
-        otpSection.style.display = 'none';
-        bookingForm.style.display = 'block';
+    if (editContactBtn) {
+        editContactBtn.addEventListener('click', () => {
+            if (otpSection) otpSection.style.display = 'none';
+            if (packageSection) packageSection.style.display = 'none';
+            if (bookingForm) bookingForm.style.display = 'block';
 
-        step2Pill.classList.remove('active');
-        stepLine.classList.remove('completed');
-        step1Pill.classList.remove('completed');
-        step1Pill.classList.add('active');
+            if (step1Pill) step1Pill.className = 'step-pill active';
+            if (stepLine1) stepLine1.className = 'step-line';
+            if (step2Pill) step2Pill.className = 'step-pill';
+            if (stepLine2) stepLine2.className = 'step-line';
+            if (step3Pill) step3Pill.className = 'step-pill';
+            if (stepLine3) stepLine3.className = 'step-line';
+            if (step4Pill) step4Pill.className = 'step-pill';
 
-        bookingTitle.textContent = 'Book Your 15-Minute Session';
-        bookingSubtitle.textContent = 'Choose your preferred time & verify your contact details to reserve your spot.';
-    });
+            if (bookingTitle) bookingTitle.textContent = 'Book Your 15-Minute Session';
+            if (bookingSubtitle) bookingSubtitle.textContent = 'Choose your preferred time & verify contact details to reserve your coaching spot.';
+        });
+    }
 
     // -------------------------------------------------------------------------
-    // STEP 3: Transition to Confirmed State
+    // STEP 3: Transition to Package Selection Step
     // -------------------------------------------------------------------------
     function transitionToStep3() {
-        step2Pill.classList.remove('active');
-        step2Pill.classList.add('completed');
-        stepLine2.classList.add('completed');
-        step3Pill.classList.add('active');
+        if (step1Pill) step1Pill.className = 'step-pill completed';
+        if (stepLine1) stepLine1.className = 'step-line completed';
+        if (step2Pill) step2Pill.className = 'step-pill completed';
+        if (stepLine2) stepLine2.className = 'step-line completed';
+        if (step3Pill) step3Pill.className = 'step-pill active';
+        if (stepLine3) stepLine3.className = 'step-line';
+        if (step4Pill) step4Pill.className = 'step-pill';
 
-        bookingTitle.textContent = 'You\'re All Set!';
-        bookingSubtitle.textContent = 'Your 15-minute micro-coaching session is reserved.';
+        if (bookingTitle) bookingTitle.textContent = 'Choose Your Coaching Package';
+        if (bookingSubtitle) bookingSubtitle.textContent = 'Select the option that best fits your focus goals. First 15-minute consultation included.';
 
-        otpSection.style.display = 'none';
-        successMessage.style.display = 'block';
+        if (otpSection) otpSection.style.display = 'none';
+        if (bookingForm) bookingForm.style.display = 'none';
+        if (successMessage) successMessage.style.display = 'none';
+        if (packageSection) packageSection.style.display = 'block';
+    }
 
-        receiptName.textContent = state.name;
-        receiptTime.textContent = `${state.day} at ${state.time} (15 Mins)`;
-        receiptContact.textContent = state.contact;
-        receiptTopic.textContent = state.topic;
+    // Package Cards Selection
+    packageCards.forEach(card => {
+        card.addEventListener('click', () => {
+            packageCards.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+
+            state.selectedPackage = {
+                id: card.dataset.packageId,
+                name: card.dataset.name,
+                price: card.dataset.price,
+                sessions: parseInt(card.dataset.sessions, 10)
+            };
+        });
+    });
+
+    if (backToOtpBtn) {
+        backToOtpBtn.addEventListener('click', () => {
+            if (packageSection) packageSection.style.display = 'none';
+            if (otpSection) otpSection.style.display = 'block';
+
+            if (step3Pill) step3Pill.className = 'step-pill';
+            if (stepLine2) stepLine2.className = 'step-line';
+            if (step2Pill) step2Pill.className = 'step-pill active';
+
+            if (bookingTitle) bookingTitle.textContent = 'Verify Contact Information';
+            if (bookingSubtitle) bookingSubtitle.textContent = `Please enter the 6-digit verification code sent to ${state.contact}`;
+        });
+    }
+
+    if (confirmPackageBtn) {
+        confirmPackageBtn.addEventListener('click', () => {
+            transitionToStep4();
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // STEP 4: Transition to Confirmed State
+    // -------------------------------------------------------------------------
+    function transitionToStep4() {
+        if (step1Pill) step1Pill.className = 'step-pill completed';
+        if (stepLine1) stepLine1.className = 'step-line completed';
+        if (step2Pill) step2Pill.className = 'step-pill completed';
+        if (stepLine2) stepLine2.className = 'step-line completed';
+        if (step3Pill) step3Pill.className = 'step-pill completed';
+        if (stepLine3) stepLine3.className = 'step-line completed';
+        if (step4Pill) step4Pill.className = 'step-pill active';
+
+        if (bookingTitle) bookingTitle.textContent = "You\'re All Set!";
+        if (bookingSubtitle) bookingSubtitle.textContent = 'Your session and package reservation is confirmed.';
+
+        if (otpSection) otpSection.style.display = 'none';
+        if (bookingForm) bookingForm.style.display = 'none';
+        if (packageSection) packageSection.style.display = 'none';
+        if (successMessage) successMessage.style.display = 'block';
+
+        if (receiptName) receiptName.textContent = state.name;
+
+        // If parent/guardian booked, display parent details row
+        if (receiptParentRow && receiptParentName) {
+            if (state.parentName && (state.role === 'A Parent' || state.role === 'A Guardian')) {
+                receiptParentRow.style.display = 'flex';
+                receiptParentName.textContent = state.parentName;
+            } else {
+                receiptParentRow.style.display = 'none';
+            }
+        }
+
+        if (receiptPackage) {
+            receiptPackage.textContent = `${state.selectedPackage.name} (₹${parseInt(state.selectedPackage.price, 10).toLocaleString('en-IN')})`;
+        }
+        if (receiptTime) receiptTime.textContent = `${state.day} at ${state.time} (15 Mins)`;
+        if (receiptContact) receiptContact.textContent = state.contact;
+        if (receiptTopic) receiptTopic.textContent = state.topic;
 
         setupGoogleCalendarLink();
         launchConfetti();
     }
 
     function setupGoogleCalendarLink() {
-        const title = encodeURIComponent("🎯 Focus Sessions 15-Minute Micro-Coaching");
-        const details = encodeURIComponent(`1-on-1 Micro-Coaching session with peer mentor.\n\nStudent: ${state.name}\nTopic: ${state.topic}\nNotes: ${state.goalNotes || 'None'}`);
-        const location = encodeURIComponent("Focus Sessions Web Portal (Link sent via SMS/Email)");
+        const title = encodeURIComponent("🧠 MindSet 15-Minute Micro-Coaching Sprint");
+        const details = encodeURIComponent(
+            `1-on-1 Micro-Coaching session with your Mind Mentor.\n\n` +
+            `Student: ${state.name}\n` +
+            (state.parentName ? `Parent: ${state.parentName}\n` : '') +
+            `Package: ${state.selectedPackage.name} (₹${state.selectedPackage.price})\n` +
+            `Focus Challenge: ${state.topic}\n` +
+            `Notes: ${state.goalNotes || 'None'}\n\n` +
+            `Session link will be shared via ${state.contactType === 'email' ? 'email' : 'SMS'} before the call.`
+        );
+        const location = encodeURIComponent("MindSet Video / WhatsApp Call");
 
         const now = new Date();
         if (state.day === 'Tomorrow') now.setDate(now.getDate() + 1);
@@ -551,27 +789,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const dateStr = now.toISOString().replace(/-|:|\.\d\d\d/g, '').slice(0, 8);
-        const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${location}&dates=${dateStr}T150000Z/${dateStr}T151500Z`;
+        const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${location}&dates=${dateStr}T100000Z/${dateStr}T101500Z`;
 
-        addToCalBtn.onclick = () => window.open(gcalUrl, '_blank');
+        if (addToCalBtn) {
+            addToCalBtn.onclick = () => window.open(gcalUrl, '_blank');
+        }
     }
 
-    bookAnotherBtn.addEventListener('click', () => {
-        successMessage.style.display = 'none';
-        bookingForm.style.display = 'block';
-        bookingForm.reset();
+    if (bookAnotherBtn) {
+        bookAnotherBtn.addEventListener('click', () => {
+            if (successMessage) successMessage.style.display = 'none';
+            if (bookingForm) {
+                bookingForm.style.display = 'block';
+                bookingForm.reset();
+            }
+            handleRoleChange();
 
-        step1Pill.className = 'step-pill active';
-        step2Pill.className = 'step-pill';
-        step3Pill.className = 'step-pill';
-        stepLine.className = 'step-line';
-        stepLine2.className = 'step-line';
+            if (step1Pill) step1Pill.className = 'step-pill active';
+            if (stepLine1) stepLine1.className = 'step-line';
+            if (step2Pill) step2Pill.className = 'step-pill';
+            if (stepLine2) stepLine2.className = 'step-line';
+            if (step3Pill) step3Pill.className = 'step-pill';
+            if (stepLine3) stepLine3.className = 'step-line';
+            if (step4Pill) step4Pill.className = 'step-pill';
 
-        bookingTitle.textContent = 'Book Your 15-Minute Session';
-        bookingSubtitle.textContent = 'Choose your preferred time & verify your contact details to reserve your spot.';
-
-        updateTimeSlots();
-    });
+            if (bookingTitle) bookingTitle.textContent = 'Book Your 15-Minute Session';
+            if (bookingSubtitle) bookingSubtitle.textContent = 'Choose your preferred time & verify contact details to reserve your coaching spot.';
+        });
+    }
 
     // -------------------------------------------------------------------------
     // Canvas Confetti Celebration Animation
@@ -584,7 +829,7 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.height = window.innerHeight;
 
         const particles = [];
-        const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#3b82f6'];
+        const colors = ['#d4af37', '#f5d77f', '#ffd700', '#ffffff', '#10b981', '#fbbf24'];
 
         for (let i = 0; i < 90; i++) {
             particles.push({
@@ -635,30 +880,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // Interactive Feature 1: Solo Sprint 15-Minute Focus Timer
     // -------------------------------------------------------------------------
     function updateTimerDisplay() {
+        if (!timerDigits) return;
         const mins = Math.floor(state.timerSeconds / 60);
         const secs = state.timerSeconds % 60;
         timerDigits.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
 
-    timerToggleBtn.addEventListener('click', () => {
-        if (state.timerIsRunning) {
-            pauseSoloTimer();
-        } else {
-            startSoloTimer();
-        }
-    });
+    if (timerToggleBtn) {
+        timerToggleBtn.addEventListener('click', () => {
+            if (state.timerIsRunning) {
+                pauseSoloTimer();
+            } else {
+                startSoloTimer();
+            }
+        });
+    }
 
-    timerResetBtn.addEventListener('click', () => {
-        pauseSoloTimer();
-        state.timerSeconds = state.timerInitialSeconds;
-        updateTimerDisplay();
-        timerStatus.textContent = 'Ready to focus?';
-    });
+    if (timerResetBtn) {
+        timerResetBtn.addEventListener('click', () => {
+            pauseSoloTimer();
+            state.timerSeconds = state.timerInitialSeconds;
+            updateTimerDisplay();
+            if (timerStatus) timerStatus.textContent = 'Ready to focus?';
+        });
+    }
 
     function startSoloTimer() {
         state.timerIsRunning = true;
-        timerToggleBtn.textContent = '⏸ Pause Sprint';
-        timerStatus.textContent = '🔥 Focus session in progress... Keep going!';
+        if (timerToggleBtn) timerToggleBtn.textContent = '⏸ Pause Sprint';
+        if (timerStatus) timerStatus.textContent = '🔥 Focus session in progress... Keep going!';
 
         state.timerInterval = setInterval(() => {
             if (state.timerSeconds > 0) {
@@ -666,7 +916,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateTimerDisplay();
             } else {
                 pauseSoloTimer();
-                timerStatus.textContent = '🎉 Sprint Completed! Take a well-deserved 5-min break.';
+                if (timerStatus) timerStatus.textContent = '🎉 Sprint Completed! Take a well-deserved 5-min break.';
                 launchConfetti();
             }
         }, 1000);
@@ -675,26 +925,25 @@ document.addEventListener('DOMContentLoaded', () => {
     function pauseSoloTimer() {
         state.timerIsRunning = false;
         clearInterval(state.timerInterval);
-        timerToggleBtn.textContent = '▶ Start 15-Min Sprint';
+        if (timerToggleBtn) timerToggleBtn.textContent = '▶ Start 15-Min Sprint';
         if (state.timerSeconds > 0 && state.timerSeconds < state.timerInitialSeconds) {
-            timerStatus.textContent = 'Paused. Click start when ready to resume.';
+            if (timerStatus) timerStatus.textContent = 'Paused. Click start when ready to resume.';
         }
     }
 
     // -------------------------------------------------------------------------
-    // Web Audio Synthesized Ambient Background Sounds & Tone Frequency
+    // Web Audio Synthesized Ambient Background Sounds
     // -------------------------------------------------------------------------
     let audioCtx = null;
     let activeNoiseNode = null;
-    let activeOscillatorNode = null;
+    let activeGainNode = null;
 
-    async function ensureAudioContext() {
+    function initAudioContext() {
         if (!audioCtx) {
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            audioCtx = new AudioContextClass();
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
         if (audioCtx.state === 'suspended') {
-            await audioCtx.resume();
+            audioCtx.resume();
         }
     }
 
@@ -706,39 +955,28 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) {}
             activeNoiseNode = null;
         }
-        if (activeOscillatorNode) {
-            try {
-                activeOscillatorNode.stop();
-                activeOscillatorNode.disconnect();
-            } catch (e) {}
-            activeOscillatorNode = null;
-        }
     }
 
-    async function playAmbientSound(type) {
-        await ensureAudioContext();
+    function playAmbientSound(type) {
+        initAudioContext();
         stopAmbientSound();
 
         if (type === 'silent') return;
 
-        // 852 Hz Pure Sine Tone Generator
         if (type === '852hz') {
             const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-
+            const gain = audioCtx.createGain();
             osc.type = 'sine';
             osc.frequency.setValueAtTime(852, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
             osc.start();
-            activeOscillatorNode = osc;
+            activeNoiseNode = osc;
+            activeGainNode = gain;
             return;
         }
 
-        // Ambient Synthesizer (Rain, White Noise, Cafe)
         const bufferSize = audioCtx.sampleRate * 2;
         const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         const output = noiseBuffer.getChannelData(0);
@@ -757,15 +995,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'rain') {
             filter.type = 'lowpass';
             filter.frequency.value = 800;
-            gainNode.gain.value = 0.2;
+            gainNode.gain.value = 0.12;
         } else if (type === 'whitenoise') {
             filter.type = 'bandpass';
             filter.frequency.value = 1200;
-            gainNode.gain.value = 0.15;
+            gainNode.gain.value = 0.08;
         } else if (type === 'cafe') {
             filter.type = 'lowpass';
             filter.frequency.value = 500;
-            gainNode.gain.value = 0.25;
+            gainNode.gain.value = 0.15;
         }
 
         whiteNoise.connect(filter);
@@ -774,18 +1012,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         whiteNoise.start();
         activeNoiseNode = whiteNoise;
+        activeGainNode = gainNode;
     }
 
     soundPills.forEach(pill => {
-        pill.addEventListener('click', async () => {
+        pill.addEventListener('click', () => {
             soundPills.forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
             const soundType = pill.dataset.sound;
             state.activeSound = soundType;
-            await playAmbientSound(soundType);
+            playAmbientSound(soundType);
         });
     });
-
-    // Run initial time validation on page load
-    updateTimeSlots();
 });
