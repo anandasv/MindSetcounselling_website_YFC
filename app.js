@@ -37,7 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
         timerInitialSeconds: 15 * 60,
         timerInterval: null,
         timerIsRunning: false,
-        activeSound: 'silent'
+        activeSound: 'silent',
+
+        // Focus Reset Planner State
+        focusMode: 'scrolling',
+        microTask: ''
     };
 
     // -------------------------------------------------------------------------
@@ -119,6 +123,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const timerToggleBtn = document.getElementById('timerToggleBtn');
     const timerResetBtn = document.getElementById('timerResetBtn');
     const soundPills = document.querySelectorAll('.sound-pill');
+
+    // Focus Reset Planner Elements
+    const resetOptions = document.querySelectorAll('.reset-option');
+    const microTaskInput = document.getElementById('microTask');
+    const createFocusPlanBtn = document.getElementById('createFocusPlanBtn');
+    const focusPlanTitle = document.getElementById('focusPlanTitle');
+    const focusPlanIntro = document.getElementById('focusPlanIntro');
+    const focusPlanSteps = document.getElementById('focusPlanSteps');
+    const resetMemoryNote = document.getElementById('resetMemoryNote');
+    const startPlannedSprintBtn = document.getElementById('startPlannedSprintBtn');
+    const usePlanForBookingBtn = document.getElementById('usePlanForBookingBtn');
 
     // -------------------------------------------------------------------------
     // Role Dropdown: Dynamic Field Display (Parent vs Student vs Teacher)
@@ -874,6 +889,133 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         render();
+    }
+
+    // -------------------------------------------------------------------------
+    // Focus Reset Planner: a tiny, saved action plan before a focus sprint
+    // -------------------------------------------------------------------------
+    const resetProfiles = {
+        scrolling: {
+            title: 'Make your phone less tempting',
+            intro: 'A little distance is enough to let your attention settle.',
+            first: 'Put your phone in another room or face-down across the room.',
+            topic: '📱 Endless phone / TikTok / Instagram scrolling'
+        },
+        overwhelm: {
+            title: 'Shrink the pile into one move',
+            intro: 'You do not need to solve everything today — only choose the next visible piece.',
+            first: 'Close every tab that is not needed for this one task.',
+            topic: '🧠 Overwhelmed & anxious about upcoming exams'
+        },
+        starting: {
+            title: 'Lower the starting line',
+            intro: 'Momentum comes after the first imperfect minute, not before it.',
+            first: 'Set out only the material you need and start without making it perfect.',
+            topic: '⚡ Just need accountability to get started'
+        }
+    };
+
+    function sanitizeTask(value) {
+        return value.trim().replace(/\s+/g, ' ').slice(0, 120);
+    }
+
+    function saveFocusPlan() {
+        try {
+            localStorage.setItem('mindsetFocusPlan', JSON.stringify({
+                mode: state.focusMode,
+                task: state.microTask
+            }));
+        } catch (e) {
+            // The planner remains useful even when browser storage is unavailable.
+        }
+    }
+
+    function renderFocusPlan(announce = false) {
+        const profile = resetProfiles[state.focusMode];
+        const task = state.microTask || 'your smallest next task';
+        if (focusPlanTitle) focusPlanTitle.textContent = profile.title;
+        if (focusPlanIntro) focusPlanIntro.textContent = profile.intro;
+        if (focusPlanSteps) {
+            focusPlanSteps.innerHTML = '';
+            const steps = [
+                ['01', 'Clear the runway', profile.first],
+                ['02', 'Touch the task', `For 10 quiet minutes: ${task}.`],
+                ['03', 'Close the loop', 'Spend the last 2 minutes marking what moved and choosing the next tiny step.']
+            ];
+            steps.forEach(([number, title, detail]) => {
+                const item = document.createElement('li');
+                const index = document.createElement('span');
+                const copy = document.createElement('p');
+                const heading = document.createElement('strong');
+                index.textContent = number;
+                heading.textContent = title;
+                copy.append(heading, document.createElement('br'), detail);
+                item.append(index, copy);
+                focusPlanSteps.appendChild(item);
+            });
+        }
+        if (resetMemoryNote) {
+            resetMemoryNote.textContent = announce ? 'Reset created and saved on this device. You only need to begin.' : 'Your plan stays on this device — no sign-up needed.';
+        }
+    }
+
+    function createFocusPlan() {
+        state.microTask = sanitizeTask(microTaskInput ? microTaskInput.value : '');
+        if (microTaskInput) microTaskInput.value = state.microTask;
+        renderFocusPlan(true);
+        saveFocusPlan();
+    }
+
+    resetOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            resetOptions.forEach(item => item.classList.remove('active'));
+            option.classList.add('active');
+            state.focusMode = option.dataset.resetMode || 'scrolling';
+            renderFocusPlan();
+        });
+    });
+
+    if (createFocusPlanBtn) createFocusPlanBtn.addEventListener('click', createFocusPlan);
+    if (microTaskInput) {
+        microTaskInput.addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                createFocusPlan();
+            }
+        });
+    }
+
+    if (startPlannedSprintBtn) {
+        startPlannedSprintBtn.addEventListener('click', () => {
+            createFocusPlan();
+            document.getElementById('quick-timer')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (!state.timerIsRunning) startSoloTimer();
+        });
+    }
+
+    if (usePlanForBookingBtn) {
+        usePlanForBookingBtn.addEventListener('click', () => {
+            createFocusPlan();
+            const profile = resetProfiles[state.focusMode];
+            if (topicSelect) topicSelect.value = profile.topic;
+            if (goalNotesInput && state.microTask) goalNotesInput.value = `My next tiny step: ${state.microTask}.`;
+            document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (goalNotesInput) goalNotesInput.focus({ preventScroll: true });
+        });
+    }
+
+    try {
+        const savedFocusPlan = JSON.parse(localStorage.getItem('mindsetFocusPlan') || 'null');
+        if (savedFocusPlan && resetProfiles[savedFocusPlan.mode]) {
+            state.focusMode = savedFocusPlan.mode;
+            state.microTask = sanitizeTask(savedFocusPlan.task || '');
+            resetOptions.forEach(option => option.classList.toggle('active', option.dataset.resetMode === state.focusMode));
+            if (microTaskInput) microTaskInput.value = state.microTask;
+            renderFocusPlan();
+            if (resetMemoryNote && state.microTask) resetMemoryNote.textContent = 'Your last reset is ready whenever you are.';
+        }
+    } catch (e) {
+        renderFocusPlan();
     }
 
     // -------------------------------------------------------------------------

@@ -436,7 +436,52 @@
         </section>
 
         <!-- =============================================================== -->
-        <!-- 4. 15 MIN SPRINT TIMER                                          -->
+        <!-- 4. FOCUS RESET PLANNER                                          -->
+        <!-- =============================================================== -->
+        <section class="focus-reset-section" id="focus-reset">
+            <div class="section-badge">✦ A gentle nudge</div>
+            <h2>Make the next 15 minutes feel lighter</h2>
+            <p class="section-sub">No grand plan required. Pick what is getting in the way, name one tiny move, and let MindSet turn it into a calm starting ritual.</p>
+
+            <div class="focus-reset-card">
+                <div class="focus-reset-main">
+                    <div class="reset-field">
+                        <span class="reset-label">What is pulling you off track?</span>
+                        <div class="reset-options" role="group" aria-label="Choose a focus challenge">
+                            <button type="button" class="reset-option active" data-reset-mode="scrolling">📱 My phone</button>
+                            <button type="button" class="reset-option" data-reset-mode="overwhelm">🧠 Too much to do</button>
+                            <button type="button" class="reset-option" data-reset-mode="starting">⚡ I can’t begin</button>
+                        </div>
+                    </div>
+                    <div class="reset-field">
+                        <label class="reset-label" for="microTask">One tiny thing you could finish or begin</label>
+                        <div class="micro-task-row">
+                            <input id="microTask" type="text" maxlength="120" placeholder="e.g. open my biology notes" autocomplete="off">
+                            <button type="button" class="reset-create-btn" id="createFocusPlanBtn">Create my reset <span>→</span></button>
+                        </div>
+                    </div>
+                    <p class="reset-memory-note" id="resetMemoryNote" aria-live="polite">Your plan stays on this device — no sign-up needed.</p>
+                </div>
+
+                <aside class="focus-plan" id="focusPlan" aria-live="polite">
+                    <div class="plan-topline"><span>YOUR 15-MINUTE RESET</span><span class="plan-status">READY</span></div>
+                    <h3 id="focusPlanTitle">Start with a softer first step</h3>
+                    <p id="focusPlanIntro">Choose a challenge and add one tiny task. We’ll map the rest.</p>
+                    <ol class="plan-steps" id="focusPlanSteps">
+                        <li><span>01</span><p><strong>Clear one distraction</strong><br>Put your phone just out of reach.</p></li>
+                        <li><span>02</span><p><strong>Set a tiny target</strong><br>Make the starting line easy to cross.</p></li>
+                        <li><span>03</span><p><strong>Give it 15 minutes</strong><br>Only decide what comes next when the timer ends.</p></li>
+                    </ol>
+                    <div class="plan-actions">
+                        <button type="button" class="plan-link" id="startPlannedSprintBtn">Start this sprint ↗</button>
+                        <button type="button" class="plan-link subtle" id="usePlanForBookingBtn">Bring plan to a coach</button>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- 5. 15 MIN SPRINT TIMER                                          -->
         <!-- =============================================================== -->
         <section class="mini-tool-section" id="quick-timer">
             <div class="section-badge">✨ Try It Now</div>

@@ -1150,6 +1150,160 @@ body {
 }
 
 /* ==========================================================================
+   Focus Reset Planner
+   ========================================================================== */
+.focus-reset-section {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.11), rgba(19, 19, 26, 0.96) 38%, rgba(16, 16, 22, 0.98));
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius-lg);
+    padding: 44px 38px;
+    margin-bottom: 54px;
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    position: relative;
+}
+
+.focus-reset-section::after {
+    content: '';
+    position: absolute;
+    width: 340px;
+    height: 340px;
+    right: -160px;
+    top: -210px;
+    border-radius: 50%;
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    box-shadow: 0 0 0 34px rgba(212, 175, 55, 0.025), 0 0 0 68px rgba(212, 175, 55, 0.018);
+    pointer-events: none;
+}
+
+.focus-reset-section > h2 {
+    color: var(--text-white);
+    font-size: 2.1rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.focus-reset-card {
+    display: grid;
+    grid-template-columns: 1.18fr 0.92fr;
+    gap: 22px;
+    margin-top: 30px;
+    position: relative;
+    z-index: 1;
+}
+
+.focus-reset-main,
+.focus-plan {
+    background: rgba(8, 8, 11, 0.58);
+    border: 1px solid var(--black-border);
+    border-radius: var(--radius-md);
+    padding: 26px;
+}
+
+.focus-reset-main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 24px;
+}
+
+.reset-label {
+    display: block;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.reset-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.reset-option {
+    appearance: none;
+    background: var(--black-card);
+    border: 1px solid var(--black-border);
+    color: var(--text-secondary);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    font: 600 0.82rem var(--font-family);
+    padding: 8px 12px;
+    transition: all 0.2s ease;
+}
+
+.reset-option:hover,
+.reset-option.active {
+    border-color: var(--gold-border-strong);
+    background: var(--gold-bg);
+    color: var(--gold-light);
+}
+
+.micro-task-row {
+    display: flex;
+    gap: 10px;
+}
+
+.micro-task-row input {
+    min-width: 0;
+    flex: 1;
+    background: var(--black-input);
+    border: 1px solid var(--black-border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font: 500 0.9rem var(--font-family);
+    outline: none;
+    padding: 12px 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.micro-task-row input::placeholder { color: #697386; }
+
+.micro-task-row input:focus {
+    border-color: var(--gold-border-strong);
+    box-shadow: 0 0 0 3px var(--gold-bg);
+}
+
+.reset-create-btn {
+    background: var(--gold-gradient);
+    border: 0;
+    border-radius: var(--radius-sm);
+    color: #0b0b0e;
+    cursor: pointer;
+    font: 800 0.83rem var(--font-family);
+    padding: 0 16px;
+    white-space: nowrap;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.reset-create-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(212, 175, 55, 0.32); }
+.reset-create-btn span { font-size: 1.1rem; margin-left: 4px; }
+
+.reset-memory-note { color: var(--text-muted); font-size: 0.78rem; }
+
+.focus-plan {
+    border-color: var(--gold-border);
+    background: linear-gradient(155deg, rgba(212, 175, 55, 0.1), rgba(10, 10, 14, 0.78));
+}
+
+.plan-topline { display: flex; justify-content: space-between; align-items: center; color: var(--gold-light); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; }
+.plan-status { border: 1px solid var(--gold-border); border-radius: var(--radius-full); font-size: 0.62rem; padding: 3px 7px; }
+.focus-plan h3 { color: var(--text-white); font-size: 1.16rem; line-height: 1.35; margin: 16px 0 5px; }
+.focus-plan > p { color: var(--text-muted); font-size: 0.82rem; line-height: 1.5; }
+.plan-steps { list-style: none; margin: 18px 0 16px; display: flex; flex-direction: column; gap: 12px; }
+.plan-steps li { display: flex; align-items: flex-start; gap: 10px; }
+.plan-steps span { color: var(--gold); font: 800 0.7rem monospace; padding-top: 3px; }
+.plan-steps p { color: var(--text-secondary); font-size: 0.8rem; line-height: 1.42; }
+.plan-steps strong { color: var(--text-primary); font-weight: 700; }
+.plan-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+.plan-link { background: transparent; border: 0; color: var(--gold-light); cursor: pointer; font: 700 0.79rem var(--font-family); padding: 0; }
+.plan-link:hover { color: var(--gold-bright); text-decoration: underline; }
+.plan-link.subtle { color: var(--text-muted); }
+
+/* ==========================================================================
    Interactive Feature 1: Solo Sprint Mini Tool
    ========================================================================== */
 .mini-tool-section {
@@ -1640,5 +1794,25 @@ body {
 
     .time-options {
         grid-template-columns: 1fr 1fr;
+    }
+
+    .focus-reset-section {
+        padding: 32px 20px;
+    }
+
+    .focus-reset-section > h2 {
+        font-size: 1.75rem;
+    }
+
+    .focus-reset-card {
+        grid-template-columns: 1fr;
+    }
+
+    .micro-task-row {
+        flex-direction: column;
+    }
+
+    .reset-create-btn {
+        padding: 12px 16px;
     }
 }
