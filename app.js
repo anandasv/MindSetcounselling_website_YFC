@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         time: '10:00 AM',
         topic: '',
         goalNotes: '',
+        sessionStyle: 'Chat first',
         
         // OTP State
         activeOtpCode: '', // Simulated or returned OTP code
@@ -114,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const receiptTime = document.getElementById('receiptTime');
     const receiptContact = document.getElementById('receiptContact');
     const receiptTopic = document.getElementById('receiptTopic');
+    const receiptStyle = document.getElementById('receiptStyle');
     const addToCalBtn = document.getElementById('addToCalBtn');
     const bookAnotherBtn = document.getElementById('bookAnotherBtn');
 
@@ -134,6 +136,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetMemoryNote = document.getElementById('resetMemoryNote');
     const startPlannedSprintBtn = document.getElementById('startPlannedSprintBtn');
     const usePlanForBookingBtn = document.getElementById('usePlanForBookingBtn');
+
+    // Extended guidance feature elements
+    const sessionStyleOptions = document.querySelectorAll('.session-style');
+    const audienceTabs = document.querySelectorAll('.audience-tab');
+    const audienceEyebrow = document.getElementById('audienceEyebrow');
+    const audienceTitle = document.getElementById('audienceTitle');
+    const audienceDescription = document.getElementById('audienceDescription');
+    const audienceList = document.getElementById('audienceList');
+    const readinessOptions = document.querySelectorAll('.readiness-option');
+    const readinessResult = document.getElementById('readinessResult');
+    const readinessPlanBtn = document.getElementById('readinessPlanBtn');
+    const dayWins = document.querySelectorAll('.day-win');
+    const winsMessage = document.getElementById('winsMessage');
+    const clearWinsBtn = document.getElementById('clearWinsBtn');
 
     // -------------------------------------------------------------------------
     // Role Dropdown: Dynamic Field Display (Parent vs Student vs Teacher)
@@ -389,6 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.name = nameVal;
             state.contact = contactVal;
             state.topic = topicVal;
+            state.sessionStyle = document.querySelector('.session-style.active')?.dataset.style || 'Chat first';
 
             if (submitFormBtn) submitFormBtn.disabled = true;
             if (btnText) btnText.textContent = 'Generating & Sending Code...';
@@ -415,7 +432,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     contact: state.contact,
                     day: state.day,
                     time: state.time,
-                    topic: state.topic
+                    topic: state.topic,
+                    sessionStyle: state.sessionStyle
                 })
             });
 
@@ -777,6 +795,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (receiptTime) receiptTime.textContent = `${state.day} at ${state.time} (15 Mins)`;
         if (receiptContact) receiptContact.textContent = state.contact;
         if (receiptTopic) receiptTopic.textContent = state.topic;
+        if (receiptStyle) receiptStyle.textContent = state.sessionStyle;
 
         setupGoogleCalendarLink();
         launchConfetti();
@@ -790,6 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
             (state.parentName ? `Parent: ${state.parentName}\n` : '') +
             `Package: ${state.selectedPackage.name} (₹${state.selectedPackage.price})\n` +
             `Focus Challenge: ${state.topic}\n` +
+            `Preferred format: ${state.sessionStyle}\n` +
             `Notes: ${state.goalNotes || 'None'}\n\n` +
             `Session link will be shared via ${state.contactType === 'email' ? 'email' : 'SMS'} before the call.`
         );
@@ -819,6 +839,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 bookingForm.reset();
             }
             handleRoleChange();
+
+            state.sessionStyle = 'Chat first';
+            sessionStyleOptions.forEach(option => option.classList.toggle('active', option.dataset.style === state.sessionStyle));
 
             if (step1Pill) step1Pill.className = 'step-pill active';
             if (stepLine1) stepLine1.className = 'step-line';
@@ -1003,6 +1026,135 @@ document.addEventListener('DOMContentLoaded', () => {
             if (goalNotesInput) goalNotesInput.focus({ preventScroll: true });
         });
     }
+
+    // -------------------------------------------------------------------------
+    // Comfort preference, audience guide, readiness nudge & weekly wins
+    // -------------------------------------------------------------------------
+    sessionStyleOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            sessionStyleOptions.forEach(item => item.classList.remove('active'));
+            option.classList.add('active');
+            state.sessionStyle = option.dataset.style || 'Chat first';
+        });
+    });
+
+    const audienceProfiles = {
+        student: {
+            eyebrow: 'FOR STUDENTS',
+            title: 'Less pressure. More momentum.',
+            description: 'Bring your unfinished assignment, exam anxiety, or scrolling spiral. Together, you’ll turn it into the next smallest action.',
+            bullets: ['Camera is always optional', 'No judgement for missed routines', 'Leave with one clear step, not a giant system']
+        },
+        parent: {
+            eyebrow: 'FOR PARENTS & GUARDIANS',
+            title: 'Support without another argument.',
+            description: 'A mentor can help your child build practical momentum while keeping the conversation calm, kind, and age-appropriate.',
+            bullets: ['Choose a communication style that feels comfortable', 'Helpful context for the first session', 'A gentle complement to home routines']
+        },
+        teacher: {
+            eyebrow: 'FOR TEACHERS',
+            title: 'A small reset can change a whole week.',
+            description: 'For students who are stuck, overwhelmed, or losing their study rhythm, MindSet creates an approachable starting point.',
+            bullets: ['Useful for independent study challenges', 'Encourages student-owned next steps', 'Simple, low-pressure accountability']
+        }
+    };
+
+    function renderAudience(profileName) {
+        const profile = audienceProfiles[profileName];
+        if (!profile) return;
+        if (audienceEyebrow) audienceEyebrow.textContent = profile.eyebrow;
+        if (audienceTitle) audienceTitle.textContent = profile.title;
+        if (audienceDescription) audienceDescription.textContent = profile.description;
+        if (audienceList) {
+            audienceList.innerHTML = '';
+            profile.bullets.forEach(bullet => {
+                const item = document.createElement('li');
+                item.textContent = bullet;
+                audienceList.appendChild(item);
+            });
+        }
+    }
+
+    audienceTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            audienceTabs.forEach(item => {
+                const active = item === tab;
+                item.classList.toggle('active', active);
+                item.setAttribute('aria-selected', String(active));
+            });
+            renderAudience(tab.dataset.audience);
+        });
+    });
+
+    const readinessProfiles = {
+        start: { title: 'You do not have to feel ready to begin.', text: 'Try opening the material and staying with it for just two minutes. Starting is the win.', focusMode: 'starting' },
+        stress: { title: 'You only need to hold one thing at a time.', text: 'Write down every urgent thought, then circle the smallest thing that helps tomorrow-you.', focusMode: 'overwhelm' },
+        routine: { title: 'A routine can restart with one kind choice.', text: 'Pick one repeatable cue for today: sit down, set a timer, and do the first visible step.', focusMode: 'starting' }
+    };
+
+    readinessOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            readinessOptions.forEach(item => item.classList.remove('active'));
+            option.classList.add('active');
+            const profile = readinessProfiles[option.dataset.readiness];
+            if (profile && readinessResult) {
+                readinessResult.querySelector('h3').textContent = profile.title;
+                readinessResult.querySelector('p').textContent = profile.text;
+                readinessResult.dataset.focusMode = profile.focusMode;
+            }
+        });
+    });
+
+    if (readinessPlanBtn) {
+        readinessPlanBtn.addEventListener('click', () => {
+            const suggestedMode = readinessResult?.dataset.focusMode;
+            if (suggestedMode && resetProfiles[suggestedMode]) {
+                state.focusMode = suggestedMode;
+                resetOptions.forEach(option => option.classList.toggle('active', option.dataset.resetMode === suggestedMode));
+                renderFocusPlan();
+            }
+            document.getElementById('focus-reset')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => microTaskInput?.focus({ preventScroll: true }), 450);
+        });
+    }
+
+    function refreshWins() {
+        const completed = [...dayWins].filter(day => day.classList.contains('complete')).length;
+        if (!winsMessage) return;
+        if (completed === 0) winsMessage.textContent = 'A clean slate is a good place to begin.';
+        else if (completed === 1) winsMessage.textContent = 'One intentional start — that counts.';
+        else if (completed < 5) winsMessage.textContent = `${completed} small wins this week. Keep it gentle.`;
+        else winsMessage.textContent = `${completed} small wins this week. You are building trust with yourself.`;
+    }
+
+    function saveWins() {
+        try {
+            const activeDays = [...dayWins].filter(day => day.classList.contains('complete')).map(day => day.dataset.day);
+            localStorage.setItem('mindsetWeeklyWins', JSON.stringify(activeDays));
+        } catch (e) {}
+    }
+
+    dayWins.forEach(day => {
+        day.addEventListener('click', () => {
+            day.classList.toggle('complete');
+            saveWins();
+            refreshWins();
+        });
+    });
+
+    if (clearWinsBtn) {
+        clearWinsBtn.addEventListener('click', () => {
+            dayWins.forEach(day => day.classList.remove('complete'));
+            saveWins();
+            refreshWins();
+        });
+    }
+
+    try {
+        const savedWins = JSON.parse(localStorage.getItem('mindsetWeeklyWins') || '[]');
+        if (Array.isArray(savedWins)) dayWins.forEach(day => day.classList.toggle('complete', savedWins.includes(day.dataset.day)));
+    } catch (e) {}
+    refreshWins();
 
     try {
         const savedFocusPlan = JSON.parse(localStorage.getItem('mindsetFocusPlan') || 'null');

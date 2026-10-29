@@ -164,6 +164,16 @@
                     <textarea id="goalNotes" rows="2" placeholder="e.g. Finish 3 pages of history revision and create chapter flashcards..."></textarea>
                 </div>
 
+                <div class="form-group">
+                    <label>How would you feel most comfortable connecting? <span class="opt">(You can change this later)</span></label>
+                    <div class="session-style-options" role="group" aria-label="Preferred session style">
+                        <button type="button" class="session-style active" data-style="Chat first">💬 Chat first</button>
+                        <button type="button" class="session-style" data-style="Voice call">🎧 Voice call</button>
+                        <button type="button" class="session-style" data-style="Camera optional">📹 Camera optional</button>
+                    </div>
+                    <p class="helper-text">There is no “right” way to show up — choose what feels easiest today.</p>
+                </div>
+
                 <button type="submit" class="book-btn" id="submitFormBtn">
                     <span id="btnText">Send Verification Code & Continue</span>
                     <span class="btn-arrow" id="btnArrow">→</span>
@@ -356,6 +366,10 @@
                         <span class="receipt-label">Focus Challenge:</span>
                         <span class="receipt-val" id="receiptTopic">Social Media Distraction</span>
                     </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Session Preference:</span>
+                        <span class="receipt-val" id="receiptStyle">Chat first</span>
+                    </div>
                 </div>
 
                 <div class="action-buttons-group">
@@ -513,7 +527,132 @@
         </section>
 
         <!-- =============================================================== -->
-        <!-- 5. FAQs                                                         -->
+        <!-- 6. WHAT A SESSION LOOKS LIKE                                    -->
+        <!-- =============================================================== -->
+        <section class="journey-section" id="how-it-works">
+            <div class="section-badge">A calmer way forward</div>
+            <h2>What happens in your 15 minutes</h2>
+            <p class="section-sub">This is not a lecture and it is not another assignment. It is a small, human reset built around what you need today.</p>
+            <div class="journey-steps">
+                <article class="journey-step">
+                    <span class="journey-number">01</span>
+                    <div class="journey-icon">👋</div>
+                    <h3>Arrive as you are</h3>
+                    <p>Tell your mentor what feels hard. No polished explanation, camera, or preparation required.</p>
+                </article>
+                <article class="journey-step">
+                    <span class="journey-number">02</span>
+                    <div class="journey-icon">🔎</div>
+                    <h3>Find the real blocker</h3>
+                    <p>Separate the noisy to-do list from the one friction point stopping you from starting.</p>
+                </article>
+                <article class="journey-step">
+                    <span class="journey-number">03</span>
+                    <div class="journey-icon">✨</div>
+                    <h3>Leave with one move</h3>
+                    <p>Finish with a tiny next step, a focus tool, and a plan that feels possible before the day ends.</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- 7. AUDIENCE GUIDE                                               -->
+        <!-- =============================================================== -->
+        <section class="audience-section">
+            <div class="audience-copy">
+                <div class="section-badge">Made for real life</div>
+                <h2>Support that meets you where you are</h2>
+                <p>MindSet adapts to the person booking — so the first conversation feels useful from minute one.</p>
+                <div class="audience-tabs" role="tablist" aria-label="Who MindSet supports">
+                    <button type="button" class="audience-tab active" role="tab" aria-selected="true" data-audience="student">For students</button>
+                    <button type="button" class="audience-tab" role="tab" aria-selected="false" data-audience="parent">For parents</button>
+                    <button type="button" class="audience-tab" role="tab" aria-selected="false" data-audience="teacher">For teachers</button>
+                </div>
+            </div>
+            <article class="audience-panel" id="audiencePanel" aria-live="polite">
+                <span class="panel-eyebrow" id="audienceEyebrow">FOR STUDENTS</span>
+                <h3 id="audienceTitle">Less pressure. More momentum.</h3>
+                <p id="audienceDescription">Bring your unfinished assignment, exam anxiety, or scrolling spiral. Together, you’ll turn it into the next smallest action.</p>
+                <ul id="audienceList">
+                    <li>Camera is always optional</li>
+                    <li>No judgement for missed routines</li>
+                    <li>Leave with one clear step, not a giant system</li>
+                </ul>
+            </article>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- 8. READINESS CHECK                                              -->
+        <!-- =============================================================== -->
+        <section class="readiness-section">
+            <div class="readiness-card">
+                <div class="section-badge">A 10-second check-in</div>
+                <h2>What would help most right now?</h2>
+                <p>Choose the thought closest to today. There is no score and no wrong answer.</p>
+                <div class="readiness-options" role="group" aria-label="Choose your current focus need">
+                    <button type="button" class="readiness-option" data-readiness="start">“I know what to do, but I cannot start.”</button>
+                    <button type="button" class="readiness-option" data-readiness="stress">“I am stressed and everything feels urgent.”</button>
+                    <button type="button" class="readiness-option" data-readiness="routine">“I keep losing my routine.”</button>
+                </div>
+            </div>
+            <aside class="readiness-result" id="readinessResult" aria-live="polite">
+                <span>YOUR GENTLE NUDGE</span>
+                <h3>You do not have to feel ready to begin.</h3>
+                <p>Try opening the material and staying with it for just two minutes. Starting is the win.</p>
+                <button type="button" class="plan-link" id="readinessPlanBtn">Create a reset plan ↗</button>
+            </aside>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- 9. WEEKLY WINS TRACKER                                          -->
+        <!-- =============================================================== -->
+        <section class="wins-section">
+            <div class="wins-heading">
+                <div class="section-badge">Private progress tracker</div>
+                <h2>Count the tiny wins</h2>
+                <p class="section-sub">A focused start counts. Tick a day when you give yourself even a few intentional minutes.</p>
+            </div>
+            <div class="wins-card">
+                <div class="week-days" id="weekDays" role="group" aria-label="Mark your focused days this week">
+                    <button type="button" class="day-win" data-day="Mon"><span>Mon</span><i></i></button>
+                    <button type="button" class="day-win" data-day="Tue"><span>Tue</span><i></i></button>
+                    <button type="button" class="day-win" data-day="Wed"><span>Wed</span><i></i></button>
+                    <button type="button" class="day-win" data-day="Thu"><span>Thu</span><i></i></button>
+                    <button type="button" class="day-win" data-day="Fri"><span>Fri</span><i></i></button>
+                    <button type="button" class="day-win" data-day="Sat"><span>Sat</span><i></i></button>
+                    <button type="button" class="day-win" data-day="Sun"><span>Sun</span><i></i></button>
+                </div>
+                <div class="wins-footer"><span id="winsMessage">A clean slate is a good place to begin.</span><button type="button" id="clearWinsBtn">Clear week</button></div>
+            </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- 10. PACKAGE GUIDE & PRIVACY                                    -->
+        <!-- =============================================================== -->
+        <section class="details-section">
+            <div class="package-guide">
+                <div class="section-badge">Choose with confidence</div>
+                <h2>Which pace feels right?</h2>
+                <div class="package-guide-grid">
+                    <article><span>ONE RESET</span><h3>Start gently</h3><p>Best when one assignment, decision, or distraction is feeling bigger than it needs to.</p></article>
+                    <article><span>5 SESSIONS</span><h3>Build a rhythm</h3><p>A supportive weekly pulse for routines, exam preparation, and getting back on track.</p></article>
+                    <article><span>10–15 SESSIONS</span><h3>Keep the momentum</h3><p>More room to notice patterns, practise tools, and make progress feel less fragile.</p></article>
+                </div>
+            </div>
+            <aside class="privacy-promise">
+                <div class="privacy-mark">🛡️</div>
+                <h3>Your comfort comes first</h3>
+                <ul>
+                    <li>Camera is optional, every time.</li>
+                    <li>Your booking details are used only to arrange your session.</li>
+                    <li>No shame, no scolding, no pressure to share more than you want.</li>
+                </ul>
+                <p>Need a hand first? Our friendly support team is available Mon–Sat, 10 AM–8:30 PM IST.</p>
+            </aside>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- 11. FAQs                                                        -->
         <!-- =============================================================== -->
         <section class="faq-section">
             <h2>Frequently Asked Questions</h2>
